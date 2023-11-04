@@ -6,6 +6,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 import play.api.mvc._
 import com.cask.WritableImplicits._
+import com.cask.errors.RedirectingUnauthorizedException
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -31,14 +32,14 @@ class AuthController @Inject()(val controllerComponents: ControllerComponents, u
                 Ok(sessionData)
                   .withSession(request.session + (AuthService.SESSIONDATAKEY -> Json.stringify(Json.toJson(sessionData))))
               }
-              case _ => {Unauthorized("Unauthorized")}
+              case _ => {throw new RedirectingUnauthorizedException("Invalid username/email and or password","")}
             })
 
           }
           case _ => throw new IllegalStateException("Missing username and or password")
         }
       }
-      case _ => throw new IllegalStateException("Body is invalid json")
+      case _ => throw new IllegalStateException("Invalid json")
     }
   }
 
