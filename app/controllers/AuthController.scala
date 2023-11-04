@@ -1,13 +1,14 @@
 package controllers
 
 import com.cask.WritableImplicits._
-import com.cask.models.{Registration, User}
+import com.cask.models.{DisplayUser, Registration, User}
 import com.cask.services.{AuthService, UserService}
 import com.cask.{I18nSupport, Logging}
 import com.google.inject.{Inject, Singleton}
 import play.api.data.{Form, FormError}
-import play.api.libs.json.{JsString, JsValue, Json}
+import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 import play.api.mvc._
+import com.cask.WritableImplicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -76,7 +77,9 @@ class AuthController @Inject()(val controllerComponents: ControllerComponents, u
         (maybeUsernameOrEmail, maybePassword) match {
           case (Some(usernameOrEmail),  Some(password)) => {
             authService.login(usernameOrEmail, password).map(mt => mt match {
-              case Some(t) => {Ok(t)}
+              case Some(t) => {
+                Ok(t._2)
+              }
               case _ => {Unauthorized("")}
             })
 

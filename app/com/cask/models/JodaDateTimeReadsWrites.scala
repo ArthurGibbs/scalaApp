@@ -9,7 +9,7 @@ class JodaDateTimeReadsWrites {}
 object JodaDateTimeReadsWrites {
   val dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
 
-  implicit val jodaDateReads = Reads[DateTime](js =>
+  implicit val jodaDateReads: Reads[DateTime] = Reads[DateTime](js =>
     js.validate[String].map[DateTime](dtString =>
       DateTime.parse(dtString, DateTimeFormat.forPattern(dateFormat))
     )

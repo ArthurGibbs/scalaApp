@@ -1,37 +1,30 @@
 package com.cask
 
 import com.google.inject.Inject
-import io.jsonwebtoken.security.Keys
+import pdi.jwt.{JwtAlgorithm, JwtJson}
+import play.api.Configuration
+import play.api.libs.json.{JsObject, JsValue}
 
-import java.time.Instant
-import java.util.{Date, UUID}
-import io.jsonwebtoken.{Claims, Jws, Jwts, SignatureAlgorithm}
+import scala.util.{Failure, Success}
 
-import scala.jdk.CollectionConverters._
-object Jwt {
-  def apply(claims: Map[String, Any], secret: String, ttl: Int): String = {
-    val key = Keys.hmacShaKeyFor(secret.getBytes("UTF-8"))
-    val jwt = Jwts.builder()
-      .setId(UUID.randomUUID.toString)
-      .setIssuedAt(Date.from(Instant.now()))
-      .setExpiration(Date.from(Instant.now().plusSeconds(ttl)))
-      .signWith(key, SignatureAlgorithm.HS512)
 
-    claims.foreach { case (name, value) =>
-      jwt.claim(name, value)
-    }
+class Jwt @Inject() (config: Configuration){
+  val secret = config.get[String]( "jwt.secret")
+  val algo = JwtAlgorithm.HS256
 
-    jwt.compact()
+  def encode(claim: JsObject): String = {
+    JwtJson.encode(claim)
+    val token = JwtJson.encode(claim, secret, algo)
+    token
   }
 
-  def unapply(jwt: String, secret: String): Option[Map[String, Any]] = {
-    try {
-      val claims: Jws[Claims] = Jwts.parserBuilder()
-        .setSigningKey(secret.getBytes("UTF-8")).build().parseClaimsJws(jwt)
-      Option(claims.getBody.asScala.toMap)
-    } catch {
-      case _: Exception => None
-    }
+  def decode(jws: String): Option[JsObject] = {
+      JwtJson.decodeJson(jws, secret, Seq(JwtAlgorithm.HS256)) match {
+        case Success(json) => {
+          Some(json)
+        }
+        case Failure(exception) => None
+      }
   }
 }
 
