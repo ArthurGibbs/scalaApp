@@ -1,5 +1,6 @@
 package com.cask.db
 
+import com.cask.models.Image
 import com.cask.models.user.ServerUser
 import com.google.inject.Inject
 
@@ -14,4 +15,6 @@ case class  DatabaseService @Inject() (databaseClient: DatabaseClient){
   def getUserById(id: Int): Future[Option[ServerUser]] = {databaseClient.getUserById(id)}
   def saveUser(user: ServerUser): Future[Option[ServerUser]] = {databaseClient.addUser(user)}
   def listUsers(): Future[Seq[ServerUser]] = {databaseClient.listUsers()}
+
+  def saveImage(image: Image) = {databaseClient.saveImage(image)}
 }

@@ -1,5 +1,6 @@
 package com.cask.db
 
+import com.cask.models.Image
 import com.cask.models.user.{PersonalUser, PublicUser, ServerUser}
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Inject}
@@ -12,6 +13,8 @@ import scala.concurrent.Future
 
 @ImplementedBy(classOf[PostgresqlDatabaseClient])
 trait DatabaseClient {
+  def saveImage(image: Image): Future[Option[Image]]
+
   //registration
   def isEmailUnused(email: String): Future[Boolean]
   def isUsernameUnused(username: String): Future[Boolean]
@@ -38,6 +41,8 @@ final class MockDatabaseClient @Inject()(db: Database, databaseExecutionContext:
 
   override def isEmailUnused(email: String): Future[Boolean] = Future.successful(true)
   override def isUsernameUnused(username: String): Future[Boolean] = Future.successful(true)
+
+  override def saveImage(image: Image): Future[Option[Image]] = Future.successful(None)
 }
 
 @Inject @Named("PostgresqlDatabaseClient")
@@ -231,6 +236,35 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
     }(databaseExecutionContext)
   }
 
+  override def saveImage(image: Image): Future[Option[Image]] = {
+    Future {
+      db.withConnection( conn => {
+        val stm = conn.prepareStatement("INSERT into images.images(" +
+          Image.getFieldList().drop(1).mkString(", ") + ") " +
+          "VALUES ("+ Image.getFieldList().drop(1).map(_ => "?").mkString(", ")   +") RETURNING *;",
+          ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+        stm.setInt(1, image.userId)
+        stm.setString(2, image.path)
+        stm.setString(3, image.caption)
+        stm.setBoolean(4, image.public)
+        stm.setBoolean(5, image.hidden)
+        stm.setTimestamp(6, new Timestamp(image.uploaded.getMillis()))
+
+        val rs = stm.executeQuery
+
+        if (rs.next) {
+          val image = Image.fromResultSet(rs)
+          Some(image)
+        } else {
+          None
+        }
+
+      })
+    }(databaseExecutionContext)
+  }
+
+
+
   private def setOptionalInt(stm: PreparedStatement, position: Int, value: Option[Int]) = {
     value match {
       case Some(int) => stm.setInt(position, int)
@@ -251,5 +285,6 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
       case _ => stm.setNull(position, java.sql.Types.TIMESTAMP)
     }
   }
+
 
 }
