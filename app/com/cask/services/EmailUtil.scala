@@ -32,7 +32,7 @@ class EmailUtil @Inject() (config: Configuration){
   properties.setProperty("mail.smtp.auth.mechanisms", "XOAUTH2");
 
   val session = Session.getDefaultInstance(properties)
-
+  val mimeSender = config.get[String]( "mail.smtp.mimeSender")
   val TOKEN_URL = "https://www.googleapis.com/oauth2/v4/token"
   val oauthClientId = config.get[String]( "mail.smtp.clientId")
   val oauthSecret = config.get[String]( "mail.smtp.clientSecret")
@@ -98,11 +98,11 @@ class EmailUtil @Inject() (config: Configuration){
     refreshAccessToken()
     try {
       val message = new MimeMessage(session)
-      message.setFrom(new InternetAddress(senderEmail))
+      message.setFrom(new InternetAddress(mimeSender))
       message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient))
       message.setSubject(subject)
-      message.setHeader("Content-Type", "text/plain;")
-      message.setContent(content, "text/html")
+      message.setHeader("Content-Type", "text/html")
+      message.setContent(content, "text/html; charset=UTF-8")
       val transport = session.getTransport("smtp")
       transport.connect(hostName, senderEmail, accessToken)
       transport.sendMessage(message, message.getAllRecipients)

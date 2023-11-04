@@ -1,5 +1,6 @@
 package com.cask.services
 
+import akka.actor.ActorSystem
 import com.cask.db.DatabaseService
 import com.cask.models.user.{PersonalUser, PublicUser, ServerUser}
 import com.cask.models.Registration
@@ -9,11 +10,12 @@ import play.api.Configuration
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration.DurationInt
 import scala.util.Random
 import scala.util.matching.Regex
 
 
-class UserService @Inject() (databaseService: DatabaseService, authService: AuthService, emailUtil: EmailUtil, config: Configuration){
+class UserService @Inject() (databaseService: DatabaseService, authService: AuthService, emailUtil: EmailUtil, config: Configuration, actorSystem: ActorSystem){
   lazy val webUrl: String = config.get[String]( "frontendUrl")
 
   def validateEmail(id: Int, code: String): Future[ServerUser] = {
@@ -99,7 +101,11 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
         databaseService.saveUser(newUser).map(maybeNewUser => {
           maybeNewUser match {
             case Some(newUser) => {
-              emailUtil.sendMail("arthurgibbs@gmail.com", "has it worked", views.html.email.template_registration(newUser, webUrl).toString())
+              Future {
+                emailUtil.sendMail("arthurgibbs@gmail.com", "Get started", views.html.email.template_registration(newUser, webUrl).toString())
+                actorSystem.log.info("Executing Sending email...")
+              }
+
               maybeNewUser
             }
             case _ => throw new IllegalStateException("saving to database failed")
