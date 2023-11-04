@@ -11,7 +11,6 @@ case class PersonalUser(
                )
 
 object PersonalUser {
-
   implicit val UserWrites: Writes[PersonalUser] = Json.writes[PersonalUser]
   implicit val UserReads: Reads[PersonalUser] = Json.reads[PersonalUser]
 

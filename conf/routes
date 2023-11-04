@@ -246,7 +246,7 @@ GET     /api/users/name/{username}    controllers.UserController.getUserByName(u
 
 
 ###
-#   summary: gets a PersonalUser by id
+#   summary: gets a logged in user
 #   tags:
 #       - users
 #   responses:
@@ -257,7 +257,23 @@ GET     /api/users/name/{username}    controllers.UserController.getUserByName(u
 #              schema:
 #                type: option[DisplayUser]
 ###
-GET     /api/users/personal    controllers.UserController.getPersonalUserById()
+GET     /api/users/self    controllers.UserController.getSelf()
+
+###
+#   summary: update user
+#   tags:
+#       - users
+#   responses:
+#       '200':
+#         description: OK
+#         content:
+#            application/json:
+#              schema:
+#                type: option[DisplayUser]
+###
++nocsrf
+POST     /api/users/self    controllers.UserController.setSelf()
+
 
 ###
 #   summary: test auth

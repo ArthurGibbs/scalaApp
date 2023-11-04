@@ -4,7 +4,7 @@ import com.cask.{I18nSupport, Logging}
 import play.api.mvc._
 import com.cask.WritableImplicits._
 import com.cask.models.{PasswordResetRequest, SessionData}
-import com.cask.models.user.ServerUser
+import com.cask.models.user.{PersonalUser, ServerUser}
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.cask.services.{AuthService, UserService}
@@ -74,8 +74,42 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
       )
   }
 
-  def getPersonalUserById() = Action.async { implicit request: Request[AnyContent] =>
+  def getSelf() = Action.async { implicit request: Request[AnyContent] =>
     val sessionData = AuthService.verifyingUserWithRoles()(request.session)
+
+    userService.getUserById(sessionData.user.id.get).map(maybeServerUser =>
+      maybeServerUser match {
+        case Some(serverUser) => Ok(serverUser.user)
+        case _ => NotFound("")
+      }
+    )
+  }
+
+  def setSelf() = Action.async { implicit request: Request[AnyContent] =>
+    val sessionData = AuthService.verifyingUserWithRoles()(request.session)
+
+    request.body.asJson match {
+      case Some(json) => {
+
+        val personalUser: PersonalUser = Json.fromJson[PersonalUser](json) match {
+          case JsSuccess(value, path) => value
+          case JsError(errors) => throw new IllegalStateException("parsing error"+ errors.toString())
+          case _ => {throw new IllegalStateException("unknown error")}
+        }
+
+        if (personalUser.public.id != sessionData.user.id){
+          throw new IllegalArgumentException("no!!")
+        }
+
+        userService.updateUser(personalUser).map(r => {
+          r match {
+            case Some(serverUser: ServerUser) => Ok(serverUser.user)
+            case _ => throw new IllegalStateException("No user with matching details found")
+          }
+        })
+      }
+      case _ => throw new IllegalArgumentException("Invalid Json")
+    }
 
     userService.getUserById(sessionData.user.id.get).map(maybeServerUser =>
       maybeServerUser match {

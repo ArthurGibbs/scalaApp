@@ -17,8 +17,6 @@ import scala.util.matching.Regex
 
 
 class UserService @Inject() (databaseService: DatabaseService, authService: AuthService, emailUtil: EmailUtil, config: Configuration, actorSystem: ActorSystem){
-
-
   lazy val webUrl: String = config.get[String]( "frontendUrl")
 
   def validateEmail(id: Int, code: String): Future[ServerUser] = {
@@ -40,7 +38,6 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
       }
     })
   }
-
   def isEmailUnused(email: String): Future[Boolean] = {
     databaseService.isEmailUnused(email)
   }
@@ -57,8 +54,31 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
   def getUserByEmail(email: String): Future[Option[ServerUser]] = {
     databaseService.getUserByEmail(email)
   }
+  def updateUser(updateRequestPersonalUser: PersonalUser): Future[Option[ServerUser]] = {
+    databaseService.getUserById(updateRequestPersonalUser.public.id.get).map(mu => {
+      mu match {
+        case Some(serverUser: ServerUser) => {
+          val updatedUser = serverUser.copy(
+            user = serverUser.user.copy(
+              public = serverUser.user.public.copy(
+                gender = updateRequestPersonalUser.public.gender,
+                bio = updateRequestPersonalUser.public.bio,
+                profileImageId = updateRequestPersonalUser.public.profileImageId
+              )
+            )
+          )
+          databaseService.updateUser(updatedUser).map(maybeUpdated => {
+            maybeUpdated match {
+              case Some(serverUser: ServerUser) => { Some(serverUser)}
+              case _ => throw new IllegalStateException("error updating database")
+            }
+          })
 
-
+        }
+        case _ => throw new IllegalStateException("No user found with id")
+      }
+    }).flatten
+  }
   def registerUser(registration: Registration): Future[Option[ServerUser]] = {
     val emailPattern: Regex = "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,63})$".r
     emailPattern.findFirstMatchIn(registration.email) match {
@@ -119,11 +139,6 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
 
   resultingUser
   }
-
-  private def generateRandomUserSalt = {
-    Iterator.continually(Random.nextPrintableChar()).filter(_.isLetterOrDigit).take(64).mkString
-  }
-
   def resetPasswordRequest(email: String): Future[Option[ServerUser]] = {
     databaseService.getUserByEmail(email).map(mu => mu match {
       case Some(serverUser: ServerUser) =>{
@@ -144,7 +159,6 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
       case None => throw new IllegalStateException("No user found with matching email")
     }).flatten
   }
-
   def resetPasswordAction(passwordResetRequest: PasswordResetRequest) = {
     databaseService.getUserById(passwordResetRequest.id).map(mu => mu match {
       case Some(serverUser: ServerUser) =>{
@@ -180,4 +194,7 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
     databaseService.listUsers()
   }
 
+  private def generateRandomUserSalt = {
+    Iterator.continually(Random.nextPrintableChar()).filter(_.isLetterOrDigit).take(64).mkString
+  }
 }
