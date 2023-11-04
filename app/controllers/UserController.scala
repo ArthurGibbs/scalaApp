@@ -112,13 +112,6 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
       }
       case _ => throw new IllegalArgumentException("Invalid Json")
     }
-
-    userService.getUserById(sessionData.user.id.get).map(maybeServerUser =>
-      maybeServerUser match {
-        case Some(serverUser) => Ok(serverUser.user)
-        case _ => NotFound("")
-      }
-    )
   }
 
 }

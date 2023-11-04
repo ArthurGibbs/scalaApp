@@ -44,6 +44,22 @@ GET     /templates/verify               controllers.HomeController.verifyEmail()
 +nocsrf
 POST     /api/auth/login                     controllers.AuthController.login()
 
+
+###
+#   summary: gets session if user has one
+#   tags:
+#       - auth
+#   responses:
+#       '200':
+#         description: OK
+#         content:
+#            application/json:
+#              schema:
+#                type: DisplayUser
+###
+GET     /api/auth/session                controllers.AuthController.session()
+
+
 ###
 #   summary: unauthorized
 #   tags:
