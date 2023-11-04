@@ -1,4 +1,4 @@
-name := """cask"""
+name := """cask.api"""
 organization := "com.cask"
 
 version := "1.0-SNAPSHOT"
@@ -6,7 +6,7 @@ version := "1.0-SNAPSHOT"
 resolvers += Resolver.jcenterRepo
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, SwaggerPlugin)
-swaggerDomainNameSpaces := Seq("models", "app.models")
+swaggerDomainNameSpaces := Seq("models", "app.com.cask.models")
 
 scalaVersion := "2.13.12"
 
@@ -17,3 +17,5 @@ libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.17.2"
 
 libraryDependencies ++= Seq(evolutions, jdbc)
 libraryDependencies += "org.postgresql" % "postgresql" % "42.6.0"
+
+libraryDependencies += "joda-time" % "joda-time" % "2.12.5"

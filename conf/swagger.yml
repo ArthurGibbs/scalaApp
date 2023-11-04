@@ -9,6 +9,8 @@ consumes:
 produces:
   - application/json
 tags:
+  - name: registration
+    description: "things for creating new account unsecured"
   - name: users
     description: things about users
 
