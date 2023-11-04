@@ -15,6 +15,36 @@ GET     /docs                       controllers.Default.redirect(to = "/docs/swa
 GET     /docs/swagger-ui/*file      controllers.Assets.at(path:String="/public/swagger-ui", file:String)
 
 ###
+#   summary: post a user
+#   tags:
+#       - users
+#   requestBody:
+#     content:
+#        application/json:
+#          schema:
+#            type: object
+#          examples:
+#            Basic:
+#              value:
+#                name:
+#                   "123"
+#                email:
+#                   "9780987654321"
+#                hash:
+#                   "9780987654321"
+#   responses:
+#       '200':
+#         description: OK
+#         content:
+#            application/json:
+#              schema:
+#                type: string
+###
++nocsrf
+POST     /api/users                  controllers.UserController.postExample()
+
+
+###
 #   summary: gets a list of users
 #   tags:
 #       - users
@@ -24,6 +54,6 @@ GET     /docs/swagger-ui/*file      controllers.Assets.at(path:String="/public/s
 #         content:
 #            application/json:
 #              schema:
-#                type: string
+#                type: list[UserRegistration]
 ###
-GET     /api/users                  controllers.UserController.getUsers()
+GET     /api/users                  controllers.UserController.getExample()

@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.0
 info:
-  title: "Duenna Api"
+  title: "Test Api"
   description: "learn some things"
   version: "0.0.1"
 consumes:
@@ -9,8 +9,6 @@ consumes:
 produces:
   - application/json
 tags:
-  - name: generic
-    description: overall things
   - name: users
     description: things about users
 
