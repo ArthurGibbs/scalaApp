@@ -16,5 +16,7 @@ case class  DatabaseService @Inject() (databaseClient: DatabaseClient){
   def saveUser(user: ServerUser): Future[Option[ServerUser]] = {databaseClient.addUser(user)}
   def listUsers(): Future[Seq[ServerUser]] = {databaseClient.listUsers()}
 
-  def saveImage(image: Image) = {databaseClient.saveImage(image)}
+  def saveImage(image: Image): Future[Option[Image]] = {databaseClient.saveImage(image)}
+  def getImage(id: Int): Future[Option[Image]] = {databaseClient.getImage(id)}
+
 }

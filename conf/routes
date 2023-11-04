@@ -242,7 +242,7 @@ GET     /api/users                      controllers.UserController.listUsers()
 #              schema:
 #                type: option[DisplayUser]
 ###
-GET     /api/users/name/{username}    controllers.UserController.getUserByName(username: String)
+GET     /api/users/name/:username    controllers.UserController.getUserByName(username: String)
 
 
 ###
@@ -288,5 +288,22 @@ POST     /api/users/self    controllers.UserController.setSelf()
 #                type: string
 ###
 +nocsrf
-POST    /api/images  controllers.ImageController.upload()
+POST    /api/images           controllers.ImageController.upload()
+
+###
+#   summary: get image
+#   tags:
+#       - test
+# parameters:
+#        - in: path
+#          name: id
+#          schema:
+#            type: string
+#          required: true
+#          description: the id
+#   responses:
+#       '200':
+#         description: OK
+###
+GET     /api/images/:id      controllers.ImageController.get(id)
 

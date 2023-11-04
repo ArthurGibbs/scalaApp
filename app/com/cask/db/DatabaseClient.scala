@@ -14,6 +14,7 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[PostgresqlDatabaseClient])
 trait DatabaseClient {
   def saveImage(image: Image): Future[Option[Image]]
+  def getImage(id: Int): Future[Option[Image]]
 
   //registration
   def isEmailUnused(email: String): Future[Boolean]
@@ -43,6 +44,8 @@ final class MockDatabaseClient @Inject()(db: Database, databaseExecutionContext:
   override def isUsernameUnused(username: String): Future[Boolean] = Future.successful(true)
 
   override def saveImage(image: Image): Future[Option[Image]] = Future.successful(None)
+  override def getImage(id: Int): Future[Option[Image]] = Future.successful(None)
+
 }
 
 @Inject @Named("PostgresqlDatabaseClient")
@@ -263,7 +266,26 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
     }(databaseExecutionContext)
   }
 
+  override def getImage(id: Int): Future[Option[Image]] = {
+    Future {
+      db.withConnection( conn => {
+        val stm = conn.prepareStatement("Select * From images.images "+
+          "WHERE id = ? ",
+          ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+        stm.setInt(1, id)
 
+        val rs = stm.executeQuery
+
+        if (rs.next) {
+          val image = Image.fromResultSet(rs)
+          Some(image)
+        } else {
+          None
+        }
+
+      })
+    }(databaseExecutionContext)
+  }
 
   private def setOptionalInt(stm: PreparedStatement, position: Int, value: Option[Int]) = {
     value match {
