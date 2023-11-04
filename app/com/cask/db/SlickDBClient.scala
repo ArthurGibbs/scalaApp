@@ -3,15 +3,18 @@ package com.cask.db
 import com.google.inject.Inject
 import org.joda.time.DateTime
 import slick.jdbc.PostgresProfile.api._
-
+import play.api.db.slick.DatabaseConfigProvider
+import slick.jdbc.JdbcProfile
 import java.sql.Timestamp
 import scala.util.Random
 
-class SlickDBClient @Inject()() extends UsersTable {
+class SlickDBClient @Inject()(dbConfigProvider: DatabaseConfigProvider) extends UsersTable {
   val db = Database.forConfig("app")
+   //or?
+  val dbConfig = dbConfigProvider.get[JdbcProfile]
 
   def testAdd(): Unit ={
-    val foo = UserTableRow(None,randomString,randomString,true,"2342","234234","234234",None,Some(12),Timestamp.valueOf(DateTime.now().toString),Timestamp.valueOf(DateTime.now().toString),None,"",None)
+    val foo = UserTableRow(None,randomString,randomString,true,"2342","234234","234234",None,Some(12),new Timestamp(DateTime.now().getMillis()),new Timestamp(DateTime.now().getMillis()),None,"",None)
     db.run(addUsersQuery.insertOrUpdate(foo))
   }
 
@@ -22,9 +25,4 @@ class SlickDBClient @Inject()() extends UsersTable {
   private lazy val addUsersQuery = users returning users.map(_.id) into (
     (f, id) => f.copy(id = Some(id))
   )
-
-
-
-
-
 }
