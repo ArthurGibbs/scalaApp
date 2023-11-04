@@ -8,11 +8,19 @@
 <p>your new account is almost ready<br>
 to validate your email please use the code</p>
 
-<div class="row center">
-<span class="code">@user.emailVerificationCode</span>
+<div style=" margin:8px;  text-align: center;">
+<span style="                    padding: 8px;
+    background-color: #1c1c1c;
+    border: solid 1px #bababa;
+    border-radius: 2px;
+    font-size: 42px;
+    color: #b81414;
+    text-align: center;
+    font-weight: bold;
+    font-family: helvetica;">@user.emailVerificationCode</span>
 </div>
 
-    <p>Or simply click <a class="link" href="@{serverUrl}/verify?id=@{URLEncoder.encode(user.user.displayUser.id.getOrElse(0).toString)}&code=@{URLEncoder.encode(user.emailVerificationCode)}"><b>Here</b></a></p>
+<p>Or simply click <a style="color: #a10000;text-decoration: none;" href="@{serverUrl}/verify?id=@{URLEncoder.encode(user.user.displayUser.id.getOrElse(0).toString)}&code=@{URLEncoder.encode(user.emailVerificationCode)}"><b>Here</b></a></p>
 <p>If this was not you, you can safely ignore this email</p>
 }
 

@@ -1,6 +1,5 @@
 package com.cask.services
 
-import com.cask.Jwt
 import com.cask.db.DatabaseService
 import com.cask.errors.RedirectingUnauthorizedException
 import com.cask.models.SessionData
@@ -14,7 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import java.nio.charset.StandardCharsets
 import scala.concurrent.Future
 
-class AuthService @Inject() (config: Configuration, databaseService: DatabaseService, jwt: Jwt) {
+class AuthService @Inject() (config: Configuration, databaseService: DatabaseService) {
   val ttl: Int = config.getOptional[Int]( "jwt.ttl").getOrElse(3600)
   val secret: String =  config.get[String]( "jwt.secret")
   lazy val serverSalt: String = config.get[String]( "app.salt")
