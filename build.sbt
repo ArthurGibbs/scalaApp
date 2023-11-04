@@ -15,11 +15,7 @@ libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "6.0.0
 libraryDependencies += "org.webjars" % "swagger-ui" % "4.11.1"
 libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.17.2"
 
-libraryDependencies += "com.typesafe.slick" %% "slick" % "3.3.3"
-libraryDependencies += "com.typesafe.slick" %% "slick-hikaricp" % "3.3.3"
-libraryDependencies += "com.typesafe.play" %% "play-slick" % "4.0.2"
-libraryDependencies += "com.typesafe.play" %% "play-slick-evolutions" % "4.0.2"
-
+libraryDependencies ++= Seq(evolutions, jdbc)
 libraryDependencies += "org.postgresql" % "postgresql" % "42.6.0"
 
 // Better field mappings for Postgres/Slick
