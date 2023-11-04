@@ -1,9 +1,10 @@
-package db
+package com.cask.db
 
-
+import com.cask.db.rows.UserRow
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Inject, Provides}
 import play.api.db.Database
+
 import scala.concurrent.Future
 
 @ImplementedBy(classOf[PostgresqlDatabaseClient])
@@ -34,7 +35,11 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
         val rs = stm.executeQuery
 
         if (rs.next) {
-          Some(UserRow(Some(rs.getInt("id")),rs.getString("username"),rs.getString("email"),rs.getString("hash")))
+          Some(UserRow(
+            Some(rs.getInt("id")),
+            rs.getString("username"),
+            rs.getString("email"),
+            rs.getString("hash")))
         } else {
           None
         }

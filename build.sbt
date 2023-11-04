@@ -1,5 +1,5 @@
 name := """cask"""
-organization := "com.example"
+organization := "com.cask"
 
 version := "1.0-SNAPSHOT"
 

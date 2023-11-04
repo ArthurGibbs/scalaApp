@@ -1,4 +1,4 @@
-package db
+package com.cask.db
 
 import akka.actor.ActorSystem
 import com.google.inject.Inject

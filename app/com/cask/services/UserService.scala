@@ -1,8 +1,8 @@
-package services
+package com.cask.services
 
-import db.DatabaseService
+import com.cask.db.DatabaseService
+import com.cask.models.User
 import com.google.inject.Inject
-import models.User
 
 import scala.concurrent.Future
 

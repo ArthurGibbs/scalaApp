@@ -1,13 +1,13 @@
 package controllers
 
 import com.cask.{I18nSupport, Logging}
-import models.User
 import play.api.mvc._
 import com.cask.WritableImplicits._
+import com.cask.models.User
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import play.api.data.{Form, FormError}
-import services.UserService
+import com.cask.services.UserService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
