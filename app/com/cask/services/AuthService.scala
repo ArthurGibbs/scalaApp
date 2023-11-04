@@ -14,8 +14,6 @@ import java.nio.charset.StandardCharsets
 import scala.concurrent.Future
 
 class AuthService @Inject() (config: Configuration, databaseService: DatabaseService) {
-  val ttl: Int = config.getOptional[Int]( "jwt.ttl").getOrElse(3600)
-  val secret: String =  config.get[String]( "jwt.secret")
   lazy val serverSalt: String = config.get[String]( "app.salt")
 
   def login(usernameOrEmail: String, password: String): Future[Option[SessionData]] = {

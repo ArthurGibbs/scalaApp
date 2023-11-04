@@ -8,6 +8,7 @@ import com.cask.WritableImplicits._
 import com.cask.models.Image
 import play.api.Configuration
 import play.api.libs.Files
+import play.api.libs.json.Json
 
 import java.io.File
 import java.util.UUID
@@ -28,7 +29,9 @@ class ImageController @Inject()(val controllerComponents: ControllerComponents, 
         .map { photo =>
           imageService.saveImage(photo).map(oi => {
             oi match {
-              case Some(i) => { Ok(s"${i.id}")}
+              case Some(i) => {
+                Ok( i.publicView())
+              }
               case _ => throw new IllegalStateException("error saving image")
             }
           })
