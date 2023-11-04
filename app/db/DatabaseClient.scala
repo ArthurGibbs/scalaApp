@@ -27,10 +27,11 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
     Future {
       // get jdbc connection
       val connection = db.withConnection( conn => {
+        System.out.println("cheese")
         val stm = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
-        val rs = stm.executeQuery("SELECT * from Users.Users")
+        val rs = stm.executeQuery("SELECT * from Users.Users;")
         while (rs.next) {
-          println(rs.getString("quote"))
+          System.out.println(rs.getString("username"))
         }
       }
       )
@@ -39,6 +40,8 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
   }
 
   override def addOrUpdateUser(userRow: UserRow): Future[Option[UserRow]] = {
+
+    updateSomething()
     Future(None)(databaseExecutionContext)
   }
 
