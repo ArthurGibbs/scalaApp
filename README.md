@@ -33,4 +33,16 @@ then:
 
 
 
+to send emails we require oath2
+requires project on https://console.cloud.google.com/apis/credentials
+with OAuth 2.0 Client IDs
+Authorised redirect URIs
+can be any https link we trust,, have not worked out how to ommit
+using scripts/oath2.py we can supply clientid and secret to --generate_oauth2_token //todo word better
+this will make a token request link, we can follow that to the authorization page, which will redirect to the redirect link on success.. 
+open devtools with preserve log on to catch the code, this can then be used in the oath2.py script to get the refresh token, needed in local.conf
+
+
+
+
 

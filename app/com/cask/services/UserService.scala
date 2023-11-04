@@ -10,7 +10,7 @@ import scala.concurrent.Future
 import scala.util.Random
 
 
-class UserService @Inject() (databaseService: DatabaseService, authService: AuthService){
+class UserService @Inject() (databaseService: DatabaseService, authService: AuthService, emailUtil: EmailUtil){
   def isEmailUnused(email: String): Future[Boolean] = {
     databaseService.isEmailUnused(email)
   }
@@ -32,6 +32,7 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
     val resultingUser = result.flatMap(r => {
       if(!r._1){throw new IllegalArgumentException("username already exists")}
       if(!r._2){throw new IllegalArgumentException("email already exists")}
+      //todo add more validation
 
       val userSalt = Iterator.continually(Random.nextPrintableChar()).filter(_.isLetterOrDigit).take(64).mkString
       val emailValidationCode = Iterator.continually(Random.nextPrintableChar()).filter(_.isLetterOrDigit).take(8).mkString
@@ -51,7 +52,16 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
         "",
         None)
 
-        databaseService.saveUser(newUser)
+        databaseService.saveUser(newUser).map(nu => {
+          nu match {
+            case Some(anu) => {
+              emailUtil.sendMail("arthurgibbs@gmail.com", "has it worked", "yay")
+              nu
+            }
+            case _ => throw new IllegalStateException("saving to database failed")
+          }
+
+        })
     })
 
 

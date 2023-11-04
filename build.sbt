@@ -19,3 +19,7 @@ libraryDependencies ++= Seq(evolutions, jdbc)
 libraryDependencies += "org.postgresql" % "postgresql" % "42.6.0"
 
 libraryDependencies += "joda-time" % "joda-time" % "2.12.5"
+
+libraryDependencies += "com.sun.mail" % "javax.mail" % "1.6.2"
+
+libraryDependencies += "org.scalaj" %% "scalaj-http" % "2.4.2"
