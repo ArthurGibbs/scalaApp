@@ -25,6 +25,8 @@ case class Image(
 }
 
 object Image {
+  implicit val imageWrites: Writes[Image] = Json.writes[Image]
+  implicit val imageReads: Reads[Image] = Json.reads[Image]
 
   def fromResultSet(rs: ResultSet): Image = {
     Image(

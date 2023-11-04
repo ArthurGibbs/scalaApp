@@ -3,6 +3,7 @@ package com.cask.services
 import com.cask.db.DatabaseService
 import com.cask.errors.RedirectingUnauthorizedException
 import com.cask.models.SessionData
+import com.cask.models.user.ServerUser
 import com.google.common.hash.Hashing
 import com.google.inject.Inject
 import play.api.Configuration
@@ -12,6 +13,7 @@ import play.api.mvc.{AnyContent, Request, Session}
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.nio.charset.StandardCharsets
 import scala.concurrent.Future
+import scala.util.Random
 
 class AuthService @Inject() (config: Configuration, databaseService: DatabaseService) {
   lazy val serverSalt: String = config.get[String]( "app.salt")
@@ -45,11 +47,10 @@ class AuthService @Inject() (config: Configuration, databaseService: DatabaseSer
     })
   }
 
-
-
   def getHashedPassword(rawPassword: String, salt: String): String = {
     Hashing.sha256().hashString(rawPassword+salt+serverSalt, StandardCharsets.UTF_8).toString
   }
+
 }
 
 object AuthService {
@@ -81,5 +82,7 @@ object AuthService {
     }
     maybeSerializedSessionData
   }
+
+
 }
 

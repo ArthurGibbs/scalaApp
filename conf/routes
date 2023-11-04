@@ -115,7 +115,7 @@ GET     /api/registration/isEmailUnused/:email            controllers.Registrati
 #                username:
 #                   "123"
 #                email:
-#                   "9780987654321"
+#                   "bob@example.com"
 #                password:
 #                   "password"
 #   responses:
@@ -129,6 +129,60 @@ GET     /api/registration/isEmailUnused/:email            controllers.Registrati
 +nocsrf
 POST     /api/registration/register                     controllers.RegistrationController.registerUser()
 
+
+###
+#   summary: post a user
+#   tags:
+#       - registration
+#   requestBody:
+#     content:
+#        application/json:
+#          schema:
+#            type: object
+#          examples:
+#            Basic:
+#              value:
+#                email:
+#                   "bob@example.com"
+#   responses:
+#       '200':
+#         description: OK
+#         content:
+#            application/json:
+#              schema:
+#                type: DisplayUser
+###
++nocsrf
+POST     /api/users/reset/request                    controllers.UserController.resetPasswordRequest()
+
+###
+#   summary: post a user
+#   tags:
+#       - registration
+#   requestBody:
+#     content:
+#        application/json:
+#          schema:
+#            type: object
+#          examples:
+#            Basic:
+#              value:
+#                id:
+#                   "12"
+#                code:
+#                   "123123123123"
+#                password:
+#                   "foo"
+#   responses:
+#       '200':
+#         description: OK
+#         content:
+#            application/json:
+#              schema:
+#                type: DisplayUser
+###
++nocsrf
+POST    /api/users/reset/password                    controllers.UserController.resetPasswordAction()
 ###
 #   summary: finds if email is unused
 #   tags:

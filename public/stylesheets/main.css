@@ -1,23 +1,15 @@
 body{
-    background-color: #1b1b1b;
+    background-color: #262626;
+    color: #7d7d7d;
 }
-.api-box{
-    & h1{
-         display: flex;
-         justify-content: center;
-    }
-    & div{
-          display: flex;
-          justify-content: center;
-      }
 
-    background-color: #ebeadd;
-    display: flex;
-    justify-content: center;
-    border: 1px solid;
+.center-block {
+    background-color: #151515;
     max-width: 500px;
     margin: auto;
     margin-top: 100px;
-    flex-direction: column;
     padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #858585;
+    box-shadow: 0 0 20px #00000052;
 }

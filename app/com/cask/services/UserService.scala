@@ -2,8 +2,9 @@ package com.cask.services
 
 import akka.actor.ActorSystem
 import com.cask.db.DatabaseService
+import com.cask.errors.RedirectingUnauthorizedException
 import com.cask.models.user.{PersonalUser, PublicUser, ServerUser}
-import com.cask.models.Registration
+import com.cask.models.{PasswordResetRequest, Registration}
 import com.google.inject.Inject
 import org.joda.time.DateTime
 import play.api.Configuration
@@ -16,6 +17,8 @@ import scala.util.matching.Regex
 
 
 class UserService @Inject() (databaseService: DatabaseService, authService: AuthService, emailUtil: EmailUtil, config: Configuration, actorSystem: ActorSystem){
+
+
   lazy val webUrl: String = config.get[String]( "frontendUrl")
 
   def validateEmail(id: Int, code: String): Future[ServerUser] = {
@@ -79,7 +82,7 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
       if(!r._2){throw new IllegalArgumentException("email already exists")}
       //todo add more validation
 
-      val userSalt = Iterator.continually(Random.nextPrintableChar()).filter(_.isLetterOrDigit).take(64).mkString
+      val userSalt = generateRandomUserSalt
       val emailValidationCode = Iterator.continually(Random.nextPrintableChar()).filter(_.isLetterOrDigit).take(8).mkString
       val hash = authService.getHashedPassword(registration.password, userSalt)
       val du = PublicUser(
@@ -103,7 +106,6 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
             case Some(newUser) => {
               Future {
                 emailUtil.sendMail("arthurgibbs@gmail.com", "Get started", views.html.email.template_registration(newUser, webUrl).toString())
-                actorSystem.log.info("Executing Sending email...")
               }
 
               maybeNewUser
@@ -116,6 +118,62 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
 
 
   resultingUser
+  }
+
+  private def generateRandomUserSalt = {
+    Iterator.continually(Random.nextPrintableChar()).filter(_.isLetterOrDigit).take(64).mkString
+  }
+
+  def resetPasswordRequest(email: String): Future[Option[ServerUser]] = {
+    databaseService.getUserByEmail(email).map(mu => mu match {
+      case Some(serverUser: ServerUser) =>{
+        val passwordResetCode = Iterator.continually(Random.nextPrintableChar()).filter(_.isLetterOrDigit).take(8).mkString
+        val alteredUser = serverUser.copy(passwordResetCode = Some(passwordResetCode))
+
+        databaseService.updateUser(alteredUser).map(mu => mu match {
+          case Some(user) => {
+            Future {
+              emailUtil.sendMail("arthurgibbs@gmail.com", "Password Reset", views.html.email.template_passwordReset(user, webUrl).toString())
+            }
+            Some(user)
+          }
+          case _ => throw new IllegalArgumentException("error updating user")
+        })
+
+      }
+      case None => throw new IllegalStateException("No user found with matching email")
+    }).flatten
+  }
+
+  def resetPasswordAction(passwordResetRequest: PasswordResetRequest) = {
+    databaseService.getUserById(passwordResetRequest.id).map(mu => mu match {
+      case Some(serverUser: ServerUser) =>{
+        val isMatch = serverUser.passwordResetCode match {
+          case Some(code) => code == passwordResetRequest.code
+          case _ => false
+        }
+        if (isMatch) {
+          val newSalt = generateRandomUserSalt
+          val newHash = authService.getHashedPassword(passwordResetRequest.password, newSalt)
+          val alteredUser = serverUser.copy(passwordResetCode = None, salt = newSalt, hash = newHash)
+
+          databaseService.updateUser(alteredUser).map(mu => mu match {
+            case Some(user) => {
+              Future {
+                emailUtil.sendMail("arthurgibbs@gmail.com", "Password Reset", views.html.email.template_passwordChange(user, webUrl).toString())
+              }
+              Some(user)
+            }
+            case _ => {throw new IllegalArgumentException("error updating user")}
+          })
+
+
+        } else {
+          throw new RedirectingUnauthorizedException("invalid request", "")
+        }
+      }
+      case None => throw new IllegalStateException("No user found with matching id")
+    }).flatten
   }
 
   def listUsers() : Future[Seq[ServerUser]] = {

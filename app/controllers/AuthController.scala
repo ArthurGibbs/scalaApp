@@ -3,10 +3,11 @@ package controllers
 import com.cask.services.{AuthService, UserService}
 import com.cask.{I18nSupport, Logging}
 import com.google.inject.{Inject, Singleton}
-import play.api.libs.json.{JsObject, JsString, JsValue, Json}
+import play.api.libs.json.{JsObject, JsString, JsSuccess, JsValue, Json}
 import play.api.mvc._
 import com.cask.WritableImplicits._
 import com.cask.errors.RedirectingUnauthorizedException
+import com.cask.models.SessionData
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -51,5 +52,4 @@ class AuthController @Inject()(val controllerComponents: ControllerComponents, u
       )
     )).withNewSession
   }
-
 }
