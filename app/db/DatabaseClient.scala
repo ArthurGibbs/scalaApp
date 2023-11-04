@@ -1,10 +1,9 @@
 package db
 
+
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Inject, Provides}
 import play.api.db.Database
-
-import java.sql.ResultSet
 import scala.concurrent.Future
 
 @ImplementedBy(classOf[PostgresqlDatabaseClient])
@@ -23,30 +22,28 @@ final class MockDatabaseClient @Inject()(db: Database, databaseExecutionContext:
 @Inject @Named("PostgresqlDatabaseClient")
 final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionContext: DatabaseExecutionContext) extends DatabaseClient{
 
-  def updateSomething(): Unit = {
+  override def addOrUpdateUser(userRow: UserRow): Future[Option[UserRow]] = {
     Future {
       // get jdbc connection
-      val connection = db.withConnection( conn => {
-        System.out.println("cheese")
-        val stm = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
-        val rs = stm.executeQuery("SELECT * from Users.Users;")
-        while (rs.next) {
-          System.out.println(rs.getString("username"))
+      val result = db.withConnection( conn => {
+        //val stm = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+        val stm = conn.prepareStatement("INSERT into Users.Users(username, email, hash) VALUES (?, ?, ?) RETURNING *;")
+        stm.setString(1, userRow.name)
+        stm.setString(2, userRow.email)
+        stm.setString(3, userRow.hash)
+        val rs = stm.executeQuery
+
+        if (rs.next) {
+          Some(UserRow(Some(rs.getInt("id")),rs.getString("username"),rs.getString("email"),rs.getString("hash")))
+        } else {
+          None
         }
-      }
-      )
+      })
+      result
     }(databaseExecutionContext)
-
-  }
-
-  override def addOrUpdateUser(userRow: UserRow): Future[Option[UserRow]] = {
-
-    updateSomething()
-    Future(None)(databaseExecutionContext)
   }
 
   override def listUsers(): Future[Seq[UserRow]] = {
-    updateSomething()
     Future(Seq())(databaseExecutionContext)
     //is this the right ec?
   }
