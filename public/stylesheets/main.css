@@ -1,0 +1,23 @@
+body{
+    background-color: #1b1b1b;
+}
+.api-box{
+    & h1{
+         display: flex;
+         justify-content: center;
+    }
+    & div{
+          display: flex;
+          justify-content: center;
+      }
+
+    background-color: #ebeadd;
+    display: flex;
+    justify-content: center;
+    border: 1px solid;
+    max-width: 500px;
+    margin: auto;
+    margin-top: 100px;
+    flex-direction: column;
+    padding: 20px;
+}
