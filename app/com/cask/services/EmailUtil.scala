@@ -43,7 +43,7 @@ class EmailUtil @Inject() (config: Configuration){
 
   def refreshAccessToken() = {
 
-    if (System.currentTimeMillis > tokenExpires) try {
+    if (System.currentTimeMillis > tokenExpires) {
       val request = "client_id=" + URLEncoder.encode(oauthClientId, "UTF-8") + "&client_secret=" + URLEncoder.encode(oauthSecret, "UTF-8") + "&refresh_token=" + URLEncoder.encode(refreshToken, "UTF-8") + "&grant_type=refresh_token"
 
       val result = Http(TOKEN_URL + "?" + request).postData("")
@@ -60,10 +60,13 @@ class EmailUtil @Inject() (config: Configuration){
             accessToken = (json \ "access_token").toOption.get.toString()
             tokenExpires = (json \ "expires_in").toOption.get.toString().toLong * 1000 + System.currentTimeMillis
           } catch {
-            case ex => {
-              throw new IllegalStateException("Error parsing access token response")
+            case ex : Throwable => {
+              throw new IllegalStateException("Error parsing access token json response")
             }
           }
+        }
+        case _ => {
+          throw new IllegalStateException("Error refreshing token")
         }
       }
     }

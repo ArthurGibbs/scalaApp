@@ -1,7 +1,7 @@
 package controllers
 
 import com.cask.WritableImplicits._
-import com.cask.models.Registration
+import com.cask.models.{Registration, User}
 import com.cask.services.UserService
 import com.cask.{I18nSupport, Logging}
 import com.google.inject.{Inject, Singleton}
@@ -39,11 +39,25 @@ class RegistrationController @Inject()(val controllerComponents: ControllerCompo
   }
 
 
+  def test() = Action.async { implicit request: Request[AnyContent] =>
+    userService.getUserByName("123").map(mu => {
+      mu match {
+        case Some(u) => {Ok(views.html.template_registration(u))}
+        case _ => {throw new IllegalArgumentException("cant find user")}
+      }
+    })
+
+  }
+
   def isUsernameUnused(username: String) = Action.async { implicit request: Request[AnyContent] =>
       userService.isUsernameUnused(username).map(result => Ok(result))
   }
 
   def isEmailUnused(email: String) = Action.async { implicit request: Request[AnyContent] =>
     userService.isEmailUnused(email).map(result => Ok(result))
+  }
+
+  def verifyEmail(id: Int, code: String) = Action.async { implicit request: Request[AnyContent] =>
+    userService.validateEmail(id, code).map(user => Ok(user.toDisplay()))
   }
 }

@@ -11,6 +11,26 @@ import scala.util.Random
 
 
 class UserService @Inject() (databaseService: DatabaseService, authService: AuthService, emailUtil: EmailUtil){
+  def validateEmail(id: Int, code: String): Future[User] = {
+    databaseService.getUserById(id).flatMap( mu => mu match {
+      case Some(user) => {
+        if(user.emailVerificationCode == code){
+          val updatedUser = user.copy(emailVerified = true)
+
+          databaseService.updateUser(updatedUser).map(mu => mu match {
+            case Some(user) => user
+            case _ => {throw new IllegalArgumentException("error updating user")}
+          })
+        } else {
+          throw new IllegalArgumentException("Code does not match")
+        }
+      }
+      case _ => {
+        throw new IllegalArgumentException("User not found")
+      }
+    })
+  }
+
   def isEmailUnused(email: String): Future[Boolean] = {
     databaseService.isEmailUnused(email)
   }
@@ -52,11 +72,11 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
         "",
         None)
 
-        databaseService.saveUser(newUser).map(nu => {
-          nu match {
-            case Some(anu) => {
-              emailUtil.sendMail("arthurgibbs@gmail.com", "has it worked", "yay")
-              nu
+        databaseService.saveUser(newUser).map(maybeNewUser => {
+          maybeNewUser match {
+            case Some(newUser) => {
+              emailUtil.sendMail("arthurgibbs@gmail.com", "has it worked", views.html.template_registration(newUser).toString())
+              maybeNewUser
             }
             case _ => throw new IllegalStateException("saving to database failed")
           }
