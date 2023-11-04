@@ -25,4 +25,3 @@ libraryDependencies += "com.sun.mail" % "javax.mail" % "1.6.2"
 libraryDependencies += "org.scalaj" %% "scalaj-http" % "2.4.2"
 
 libraryDependencies += "com.github.jwt-scala" %% "jwt-play-json" % "9.4.4"
-

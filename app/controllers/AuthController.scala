@@ -40,16 +40,6 @@ class AuthController @Inject()(val controllerComponents: ControllerComponents, u
     userRegistrationResult.fold(onError, onSuccess)
   }
 
-  def test() = Action.async { implicit request: Request[AnyContent] =>
-    userService.getUserByName("123").map(mu => {
-      mu match {
-        case Some(u) => {Ok(views.html.template_registration(u))}
-        case _ => {throw new IllegalArgumentException("cant find user")}
-      }
-    })
-
-  }
-
   def isUsernameUnused(username: String) = Action.async { implicit request: Request[AnyContent] =>
       userService.isUsernameUnused(username).map(result => Ok(result))
   }
@@ -77,13 +67,11 @@ class AuthController @Inject()(val controllerComponents: ControllerComponents, u
         (maybeUsernameOrEmail, maybePassword) match {
           case (Some(usernameOrEmail),  Some(password)) => {
             authService.login(usernameOrEmail, password).map(mt => mt match {
-              case Some(t) => {
-                Ok(t._1.toDisplay()).withHeaders(
-                  ("Set-Cookie", t._2))
-                  .withCookies(Cookie("jwt",t._2,None,"/",None, false, true, Some(Cookie.SameSite.Lax )))
-                  .withSession(request.session + ("saidHello" -> "yes"))
+              case Some(sessionData) => {
+                Ok(sessionData)
+                  .withSession(request.session + (AuthService.SESSIONDATAKEY -> Json.stringify(Json.toJson(sessionData))))
               }
-              case _ => {Unauthorized("")}
+              case _ => {Unauthorized("Unauthorized")}
             })
 
           }
