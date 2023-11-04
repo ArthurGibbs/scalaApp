@@ -5,9 +5,9 @@ import play.api.libs.json.{Json, Reads, Writes}
 import java.sql.ResultSet
 
 case class PersonalUser(
-                 displayUser: PublicUser,
-                 email: String,
-                 emailVerified: Boolean
+                         public: PublicUser,
+                         email: String,
+                         emailVerified: Boolean
                )
 
 object PersonalUser {

@@ -37,7 +37,7 @@ class AuthService @Inject() (config: Configuration, databaseService: DatabaseSer
             //todo get roles
             val roles = Seq()
 
-            Some((SessionData(claimedUser.user.displayUser, roles)))
+            Some((SessionData(claimedUser.user.public, roles)))
           } else {
             None
           }

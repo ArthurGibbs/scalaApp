@@ -47,7 +47,7 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
         userService.resetPasswordAction(passwordResetRequest).map(r => {
           r match {
             case Some(serverUser: ServerUser) => {
-              Ok(serverUser.user.displayUser)
+              Ok(serverUser.user.public)
             }
             case _ => throw new IllegalStateException("No user with matching details found")
           }
@@ -61,14 +61,14 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
   def listUsers() = secureAction.async { implicit request: Request[AnyContent] =>
 
       userService.listUsers().map(users =>
-        Ok(users.map(_.user.displayUser))
+        Ok(users.map(_.user.public))
       )
   }
 
   def getUserByName(username: String) = Action.async { implicit request: Request[AnyContent] =>
       userService.getUserByName(username).map( user =>
         user match {
-          case Some(user) => Ok(user.user.displayUser)
+          case Some(user) => Ok(user.user.public)
           case _ => NotFound("")
         }
       )

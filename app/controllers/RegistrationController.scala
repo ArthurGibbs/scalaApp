@@ -29,7 +29,7 @@ class RegistrationController @Inject()(val controllerComponents: ControllerCompo
       log.debug(s"Received registration form for ${registration.username}, ${registration.email}")
       userService.registerUser(registration).map(maybeUser =>
         maybeUser match {
-          case Some(user) => Ok(user.user)
+          case Some(serverUser) => Ok(serverUser.user.public)
           case _ => InternalServerError("Registration Failed")
         }
       )
@@ -62,7 +62,7 @@ class RegistrationController @Inject()(val controllerComponents: ControllerCompo
   }
 
   def verifyEmail(id: Int, code: String) = Action.async { implicit request: Request[AnyContent] =>
-    userService.validateEmail(id, code).map(user => Ok(user.user.displayUser))
+    userService.validateEmail(id, code).map(user => Ok(user.user.public))
   }
 
 }

@@ -56,18 +56,18 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
           "hash, salt, profile_image_id, created_on, last_seen, gender, bio, bio_updated) " +
           "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;",
           ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
-        stm.setString(1, serverUser.user.displayUser.username)
+        stm.setString(1, serverUser.user.public.username)
         stm.setString(2, serverUser.user.email)
         stm.setBoolean(3, serverUser.user.emailVerified)
         stm.setString(4, serverUser.emailVerificationCode)
         stm.setString(5, serverUser.hash)
         stm.setString(6, serverUser.salt)
-        setOptionalInt(stm,7,serverUser.user.displayUser.profileImageId)
-        stm.setTimestamp(8, new Timestamp(serverUser.user.displayUser.createdOn.getMillis()))
-        stm.setTimestamp(9, new Timestamp(serverUser.user.displayUser.lastSeen.getMillis()))
-        setOptionalString(stm,10,serverUser.user.displayUser.gender)
-        stm.setString(11, serverUser.user.displayUser.bio)
-        setOptionalDateTime(stm,12,serverUser.user.displayUser.bioUpdated)
+        setOptionalInt(stm,7,serverUser.user.public.profileImageId)
+        stm.setTimestamp(8, new Timestamp(serverUser.user.public.createdOn.getMillis()))
+        stm.setTimestamp(9, new Timestamp(serverUser.user.public.lastSeen.getMillis()))
+        setOptionalString(stm,10,serverUser.user.public.gender)
+        stm.setString(11, serverUser.user.public.bio)
+        setOptionalDateTime(stm,12,serverUser.user.public.bioUpdated)
 
         val rs = stm.executeQuery
 
@@ -184,22 +184,22 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
           "hash = ?,  salt = ?, profile_image_id = ?, created_on = ?, last_seen = ?, gender = ?, bio = ?, bio_updated = ?, password_reset_code = ? " +
           "WHERE Users.id = ? RETURNING *;",
           ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
-        stm.setString(1, serverUser.user.displayUser.username)
+        stm.setString(1, serverUser.user.public.username)
         stm.setString(2, serverUser.user.email)
         stm.setBoolean(3, serverUser.user.emailVerified)
         stm.setString(4, serverUser.emailVerificationCode)
         stm.setString(5, serverUser.hash)
         stm.setString(6, serverUser.salt)
-        setOptionalInt(stm,7,serverUser.user.displayUser.profileImageId)
-        stm.setTimestamp(8, new Timestamp(serverUser.user.displayUser.createdOn.getMillis()))
-        stm.setTimestamp(9, new Timestamp(serverUser.user.displayUser.lastSeen.getMillis()))
-        setOptionalString(stm,10,serverUser.user.displayUser.gender)
-        stm.setString(11, serverUser.user.displayUser.bio)
-        setOptionalDateTime(stm,12,serverUser.user.displayUser.bioUpdated)
+        setOptionalInt(stm,7,serverUser.user.public.profileImageId)
+        stm.setTimestamp(8, new Timestamp(serverUser.user.public.createdOn.getMillis()))
+        stm.setTimestamp(9, new Timestamp(serverUser.user.public.lastSeen.getMillis()))
+        setOptionalString(stm,10,serverUser.user.public.gender)
+        stm.setString(11, serverUser.user.public.bio)
+        setOptionalDateTime(stm,12,serverUser.user.public.bioUpdated)
         setOptionalString(stm,13,serverUser.passwordResetCode)
 
 
-        stm.setInt(14, serverUser.user.displayUser.id.getOrElse(0))//todo prevent user id 0
+        stm.setInt(14, serverUser.user.public.id.getOrElse(0))//todo prevent user id 0
 
 
         val rs = stm.executeQuery

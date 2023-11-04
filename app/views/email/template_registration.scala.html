@@ -1,9 +1,9 @@
 @import com.cask.models.user.ServerUser
 
 @import java.net.URLEncoder
-@(user: ServerUser, serverUrl: String)
+@(serverUser: ServerUser, serverUrl: String)
 
-@emailWrapper(user,serverUrl) {
+@emailWrapper(serverUser,serverUrl) {
 
 <p>your new account is almost ready<br>
 to validate your email please use the code</p>
@@ -17,10 +17,10 @@ to validate your email please use the code</p>
     color: #b81414;
     text-align: center;
     font-weight: bold;
-    font-family: helvetica;">@user.emailVerificationCode</span>
+    font-family: helvetica;">@serverUser.emailVerificationCode</span>
 </div>
 
-<p>Or simply click <a style="color: #a10000;text-decoration: none;" href="@{serverUrl}/verify?id=@{URLEncoder.encode(user.user.displayUser.id.getOrElse(0).toString)}&code=@{URLEncoder.encode(user.emailVerificationCode)}"><b>Here</b></a></p>
+<p>Or simply click <a style="color: #a10000;text-decoration: none;" href="@{serverUrl}/verify?id=@{URLEncoder.encode(serverUser.user.public.id.getOrElse(0).toString)}&code=@{URLEncoder.encode(serverUser.emailVerificationCode)}"><b>Here</b></a></p>
 <p>If this was not you, you can safely ignore this email</p>
 }
 
