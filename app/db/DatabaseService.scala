@@ -3,13 +3,16 @@ package db
 import com.google.inject.Inject
 import models.User
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 case class  DatabaseService @Inject() (databaseClient: DatabaseClient){
-  def saveUser(user: User): Option[User] = {
-    databaseClient.addOrUpdateUser(userRowFromData(user)).map(userDataFromRow)
+  def saveUser(user: User): Future[Option[User]] = {
+    databaseClient.addOrUpdateUser(userRowFromData(user)).map(_.map(userDataFromRow))
   }
 
-  def listUsers(): Seq[User] = {
-    databaseClient.listUsers().map(userDataFromRow)
+  def listUsers(): Future[Seq[User]] = {
+    databaseClient.listUsers().map(_.map(userDataFromRow))
   }
 
   // CONVERTERS

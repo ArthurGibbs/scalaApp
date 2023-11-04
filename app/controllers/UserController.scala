@@ -15,17 +15,18 @@ import scala.concurrent.Future
 @Singleton
 class UserController @Inject()(val controllerComponents: ControllerComponents, userService: UserService) extends BaseController with I18nSupport with Logging {
 
-  def postExample = Action { implicit request: Request[AnyContent] =>
-    def onError(formWithErrors: Form[User]): Result = {
+  def postExample = Action.async { implicit request: Request[AnyContent] =>
+    def onError(formWithErrors: Form[User]): Future[Result] = {
       val allErrors: Seq[FormError] = formWithErrors.globalErrors ++ formWithErrors.errors
       allErrors.map(_.format).distinct.foreach(x => log.warn("Registration form validation failed: " + x))
-      BadRequest("foo")
+      Future(BadRequest("foo"))
     }
 
-    def onSuccess(formDetails: User): Result = {
+    def onSuccess(formDetails: User): Future[Result] = {
       log.debug(s"Received registration form for ${formDetails.name}, ${formDetails.email}")
-      val result = userService.registerUser(formDetails)
-      Ok(result)
+      userService.registerUser(formDetails).map(
+        Ok(_)
+      )
     }
 
     val userRegistrationResult = User.form.bindFromRequest()
@@ -33,9 +34,8 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
   }
 
   def getExample() = Action.async { implicit request: Request[AnyContent] =>
-    val user1 : User = new User(name= "ian", email = "ian@gmail.com", hash ="123")
-    val user2 : User = new User(name= "asdfasdf", email = "asdfasdf@gmail.com", hash ="1233123")
-    val list: List[User] = List(user1, user2)
-    Future(Ok(list))
+    userService.listUsers().map(
+      Ok(_)
+    )
   }
 }
