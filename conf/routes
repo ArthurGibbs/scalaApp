@@ -14,4 +14,16 @@ GET     /docs                       controllers.Default.redirect(to = "/docs/swa
 ### NoDocs ###
 GET     /docs/swagger-ui/*file      controllers.Assets.at(path:String="/public/swagger-ui", file:String)
 
+###
+#   summary: gets a list of users
+#   tags:
+#       - users
+#   responses:
+#       '200':
+#         description: OK
+#         content:
+#            application/json:
+#              schema:
+#                type: string
+###
 GET     /api/users                  controllers.UserController.getUsers()
