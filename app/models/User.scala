@@ -6,27 +6,27 @@ import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.Format.GenericFormat
 import play.api.libs.json.{JsPath, Reads, Writes}
 
-case class UserRegistration(id: Option[Int] = None, name: String, email: String, hash: String)
+case class User(id: Option[Int] = None, name: String, email: String, hash: String) {}
 
-object UserRegistration {
+object User {
   val form = Form(mapping(
     "id" -> optional(number),
     "name" -> text,
     "email" -> text,
     "hash" -> text
-  )(UserRegistration.apply)(UserRegistration.unapply))
+  )(User.apply)(User.unapply))
 
-  implicit val UserRegistrationWrites: Writes[UserRegistration] =
+  implicit val UserWrites: Writes[User] =
     (JsPath \ "id").write[Option[Int]]
       .and((JsPath \ "name").write[String])
       .and((JsPath \ "email").write[String])
-      .and((JsPath \ "hash").write[String])(unlift(UserRegistration.unapply))
+      .and((JsPath \ "hash").write[String])(unlift(User.unapply))
 
-  implicit val UserRegistrationReads: Reads[UserRegistration] =
+  implicit val UserReads: Reads[User] =
     (JsPath \ "id").readNullable[Int]
       .and((JsPath \ "name").read[String])
       .and((JsPath \ "email").read[String])
-      .and((JsPath \ "hash").read[String])(UserRegistration.apply _)
+      .and((JsPath \ "hash").read[String])(User.apply _)
 }
 
 

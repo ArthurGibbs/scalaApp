@@ -21,3 +21,7 @@ libraryDependencies += "com.typesafe.play" %% "play-slick" % "4.0.2"
 libraryDependencies += "com.typesafe.play" %% "play-slick-evolutions" % "4.0.2"
 
 libraryDependencies += "org.postgresql" % "postgresql" % "42.6.0"
+
+// Better field mappings for Postgres/Slick
+libraryDependencies += "com.github.tminglei" %% "slick-pg" % "0.20.4"
+libraryDependencies += "com.github.tminglei" %% "slick-pg_circe-json" % "0.20.4"
