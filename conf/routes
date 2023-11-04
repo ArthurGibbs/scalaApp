@@ -338,5 +338,5 @@ GET     /api/images/:id      controllers.ImageController.get(id)
 #                type: DisplayUser
 ###
 +nocsrf
-POST     /api/registration/register                     controllers.TestController.create()
+POST     /api/users/testSlick                     controllers.TestController.create()
 
