@@ -10,7 +10,9 @@ produces:
   - application/json
 tags:
   - name: registration
-    description: "things for creating new account unsecured"
+    description: "For registration of new user accounts"
   - name: users
-    description: things about users
+    description: "For various action on user"
+  - name: auth
+    description: "For registration of new user accounts"
 

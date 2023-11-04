@@ -11,9 +11,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class UserController @Inject()(val controllerComponents: ControllerComponents, userService: UserService, mysecurityFilter: MySecurityFilter) extends BaseController with I18nSupport with Logging  {
+class UserController @Inject()(val controllerComponents: ControllerComponents, userService: UserService, secureAction: SecureAction) extends BaseController with I18nSupport with Logging  {
 
-  def listUsers() = Action.async { implicit request: Request[AnyContent] =>
+  def listUsers() = secureAction.async { implicit request: Request[AnyContent] =>
+
       userService.listUsers().map(users =>
         Ok(users.map(_.toDisplay()))
       )

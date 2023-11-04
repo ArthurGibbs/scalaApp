@@ -36,6 +36,7 @@ case class  DatabaseService @Inject() (databaseClient: DatabaseClient){
   }
 
   def listUsers(): Future[Seq[User]] = {
-    databaseClient.listUsers().map(_.map(DTOFromDSO))
+    var mook = databaseClient.listUsers()
+    mook.map(_.map(DTOFromDSO))
   }
 }

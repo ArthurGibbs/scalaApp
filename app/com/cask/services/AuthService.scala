@@ -2,6 +2,7 @@ package com.cask.services
 
 import com.cask.Jwt
 import com.cask.db.DatabaseService
+import com.cask.errors.RedirectingUnauthorizedException
 import com.cask.models.{SessionData, User}
 import com.google.common.hash.Hashing
 import com.google.inject.Inject
@@ -70,7 +71,7 @@ object AuthService {
         sessionData
       }
       case _ => {
-        throw new IllegalStateException("UNATHORIZED TODO")
+        throw new RedirectingUnauthorizedException("Unauthorized","/login")
         //maybe redirecting error as this should only be non logged in users
       }
     }

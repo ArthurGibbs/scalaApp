@@ -8,7 +8,7 @@ case class SessionData(
               user: DisplayUser,
               roles: Seq[Role]) {}
 
-
+//need to make sure this cannot exceed 4kb cookie max
 object SessionData {
 
   implicit val SessionDataWrites: Writes[SessionData] =

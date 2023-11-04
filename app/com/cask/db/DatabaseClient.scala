@@ -112,13 +112,13 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
     Future {
       db.withConnection( conn => {
         //val stm = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
-        val stm = conn.prepareStatement("Select * From Users.Users",
+        val stm = conn.prepareStatement("Select * From Users.Users;",
           ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
         val rs = stm.executeQuery
 
         val list: ListBuffer[UserDSO] = ListBuffer()
         while (rs.next) {
-          list :+ UserDSO(
+          list += UserDSO(
             Some(rs.getInt("id")),
             rs.getString("username"),
             rs.getString("email"),
