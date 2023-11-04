@@ -24,9 +24,9 @@ run
 
 docker pull postgres:14.5
 
-docker volume create duenna_postgres_data
+docker volume create cask_postgres_data
 
-docker run --name duenna_postgres_14.5 -e POSTGRES_PASSWORD=password -d -p 5432:5432 -v duenna_postgres_data:/var/lib/postgresql/data postgres:14.5
+docker run --name cask_postgres_14.5 -e POSTGRES_PASSWORD=password -d -p 5432:5432 -v cask_postgres_data:/var/lib/postgresql/data postgres:14.5
 
 
 

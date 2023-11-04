@@ -1,4 +1,4 @@
-package com.duenna
+package com.cask
 
 import play.api.http.{ContentTypeOf, ContentTypes, Writeable}
 import play.api.libs.json.Writes

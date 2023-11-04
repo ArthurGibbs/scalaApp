@@ -1,4 +1,4 @@
-package com.duenna
+package com.cask
 
 import play.api.i18n.{I18NSupportLowPriorityImplicits, Messages, MessagesApi}
 import play.api.mvc.RequestHeader

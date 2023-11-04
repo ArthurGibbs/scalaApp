@@ -1,4 +1,4 @@
-name := """duenna"""
+name := """cask"""
 organization := "com.example"
 
 version := "1.0-SNAPSHOT"

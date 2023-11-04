@@ -1,4 +1,4 @@
-package com.duenna
+package com.cask
 
 import org.slf4j.{Logger, LoggerFactory}
 

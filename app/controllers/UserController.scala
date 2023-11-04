@@ -1,11 +1,11 @@
 package controllers
 
-import com.duenna.{I18nSupport, Logging}
+import com.cask.{I18nSupport, Logging}
 import models.UserRegistration
 
 import javax.inject._
 import play.api.mvc._
-import com.duenna.WritableImplicits._
+import com.cask.WritableImplicits._
 import play.api.data.{Form, FormError}
 
 @Singleton
