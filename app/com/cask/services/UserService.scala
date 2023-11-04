@@ -4,14 +4,13 @@ import akka.actor.ActorSystem
 import com.cask.db.DatabaseService
 import com.cask.errors.RedirectingUnauthorizedException
 import com.cask.models.user.{PersonalUser, PublicUser, ServerUser}
-import com.cask.models.{PasswordResetRequest, Registration}
+import com.cask.models.{PasswordResetAction, Registration, VerifyEmailRequest}
 import com.google.inject.Inject
 import org.joda.time.DateTime
 import play.api.Configuration
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.duration.DurationInt
 import scala.util.Random
 import scala.util.matching.Regex
 
@@ -19,10 +18,10 @@ import scala.util.matching.Regex
 class UserService @Inject() (databaseService: DatabaseService, authService: AuthService, emailUtil: EmailUtil, config: Configuration, actorSystem: ActorSystem){
   lazy val webUrl: String = config.get[String]( "frontendUrl")
 
-  def validateEmail(id: Int, code: String): Future[ServerUser] = {
-    databaseService.getUserById(id).flatMap( mu => mu match {
+  def validateEmail(verifyEmailRequest: VerifyEmailRequest): Future[ServerUser] = {
+    databaseService.getUserById(verifyEmailRequest.id).flatMap( mu => mu match {
       case Some(serverUser) => {
-        if(serverUser.emailVerificationCode == code){
+        if(serverUser.emailVerificationCode == verifyEmailRequest.code){
           val updatedUser = serverUser.copy(user = serverUser.user.copy(emailVerified = true))
 
           databaseService.updateUser(updatedUser).map(mu => mu match {
@@ -135,8 +134,6 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
 
         })
     })
-
-
   resultingUser
   }
   def resetPasswordRequest(email: String): Future[Option[ServerUser]] = {
@@ -159,16 +156,16 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
       case None => throw new IllegalStateException("No user found with matching email")
     }).flatten
   }
-  def resetPasswordAction(passwordResetRequest: PasswordResetRequest) = {
-    databaseService.getUserById(passwordResetRequest.id).map(mu => mu match {
+  def resetPasswordAction(passwordResetAction: PasswordResetAction) = {
+    databaseService.getUserById(passwordResetAction.id).map(mu => mu match {
       case Some(serverUser: ServerUser) =>{
         val isMatch = serverUser.passwordResetCode match {
-          case Some(code) => code == passwordResetRequest.code
+          case Some(code) => code == passwordResetAction.code
           case _ => false
         }
         if (isMatch) {
           val newSalt = generateRandomUserSalt
-          val newHash = authService.getHashedPassword(passwordResetRequest.password, newSalt)
+          val newHash = authService.getHashedPassword(passwordResetAction.password, newSalt)
           val alteredUser = serverUser.copy(passwordResetCode = None, salt = newSalt, hash = newHash)
 
           databaseService.updateUser(alteredUser).map(mu => mu match {
@@ -189,10 +186,11 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
       case None => throw new IllegalStateException("No user found with matching id")
     }).flatten
   }
-
   def listUsers() : Future[Seq[ServerUser]] = {
     databaseService.listUsers()
   }
+
+  //--------------------------------------------------------------------------------------------------------------------
 
   private def generateRandomUserSalt = {
     Iterator.continually(Random.nextPrintableChar()).filter(_.isLetterOrDigit).take(64).mkString

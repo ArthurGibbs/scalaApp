@@ -209,7 +209,7 @@ POST    /api/users/reset/password                    controllers.UserController.
 #                type: DisplayUser
 ###
 +nocsrf
-GET     /api/registration/verify-email                    controllers.RegistrationController.verifyEmail(id: Int, code: String)
+POST     /api/registration/verify-email                    controllers.RegistrationController.verifyEmail()
 
 ###
 #   summary: gets a list of users

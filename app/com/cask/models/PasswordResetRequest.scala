@@ -1,11 +1,10 @@
 package com.cask.models
 
-import com.cask.models.user.PersonalUser
 import play.api.libs.json.{Json, Reads, Writes}
 
-case class PasswordResetRequest(id: Int, code: String, password: String)
+case class PasswordResetRequest(email: String)
 
 object PasswordResetRequest {
-  implicit val UserWrites: Writes[PasswordResetRequest] = Json.writes[PasswordResetRequest]
-  implicit val UserReads: Reads[PasswordResetRequest] = Json.reads[PasswordResetRequest]
+  implicit val passwordResetRequestWrites: Writes[PasswordResetRequest] = Json.writes[PasswordResetRequest]
+  implicit val passwordResetRequestReads: Reads[PasswordResetRequest] = Json.reads[PasswordResetRequest]
 }

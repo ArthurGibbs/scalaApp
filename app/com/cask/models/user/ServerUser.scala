@@ -11,10 +11,6 @@ case class ServerUser(
                        hash: String,
                        salt: String,
                        passwordResetCode: Option[String] = None) {
-
-  implicit val ServerUserWrites: Writes[ServerUser] = Json.writes[ServerUser]
-  implicit val ServerUserReads: Reads[ServerUser] = Json.reads[ServerUser]
-
 }
 object ServerUser {
   def fromResultSet(rs: ResultSet, u: PersonalUser): ServerUser = {

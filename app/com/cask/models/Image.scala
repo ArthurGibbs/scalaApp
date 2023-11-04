@@ -1,10 +1,8 @@
 package com.cask.models
 
-import com.cask.models.user.PublicUser
 import org.joda.time.DateTime
 import play.api.libs.json.{JsObject, Json, Reads, Writes}
 import com.cask.models.JodaDateTimeReadsWrites._
-import com.fasterxml.jackson.annotation.JsonValue
 
 import java.sql.ResultSet
 
