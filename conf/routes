@@ -9,4 +9,9 @@ GET     /                           controllers.HomeController.index()
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
+### NoDocs ###
+GET     /docs                       controllers.Default.redirect(to = "/docs/swagger-ui/index.html")
+### NoDocs ###
+GET     /docs/swagger-ui/*file      controllers.Assets.at(path:String="/public/swagger-ui", file:String)
 
+GET     /api/users                  controllers.UserController.getUsers()
