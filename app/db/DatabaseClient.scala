@@ -1,38 +1,50 @@
 package db
 
-import play.api.db.slick.DatabaseConfigProvider
-import com.github.tminglei.slickpg._
+import com.google.inject.name.Named
+import com.google.inject.{ImplementedBy, Inject, Provides}
+import play.api.db.Database
 
-import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import java.sql.ResultSet
+import scala.concurrent.Future
 
+@ImplementedBy(classOf[PostgresqlDatabaseClient])
 trait DatabaseClient {
   //Users
   def addOrUpdateUser(userRow: UserRow): Future[Option[UserRow]]
   def listUsers(): Future[Seq[UserRow]]
 }
 
-class PostgresDatabaseClient @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
-  private val dbConfig = dbConfigProvider.get[ExPostgresProfile]
-  import dbConfig._
-  import profile.api._
-  private val users = TableQuery[UserTable]
-  private lazy val addUserQuery = users returning users.map(_.id) into (
-    (f, id) => f.copy(id = Some(id))
-    )
+@Inject @Named("MockDatabaseClient")
+final class MockDatabaseClient @Inject()(db: Database, databaseExecutionContext: DatabaseExecutionContext) extends DatabaseClient{
+  override def addOrUpdateUser(userRow: UserRow): Future[Option[UserRow]] = Future.successful(None)
+  override def listUsers(): Future[Seq[UserRow]] = Future.successful(Seq())
+}
 
-  def addOrUpdateUser(userRow: UserRow): Future[UserRow] = db.run {
-    for {
-      maybeExisting: Option[UserRow] <- this.users.filter(_.id === userRow.id).result.headOption
-      newRow: UserRow = maybeExisting match {
-        case Some(r) => userRow.withId(r.id)
-        case _ => userRow
+@Inject @Named("PostgresqlDatabaseClient")
+final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionContext: DatabaseExecutionContext) extends DatabaseClient{
+
+  def updateSomething(): Unit = {
+    Future {
+      // get jdbc connection
+      val connection = db.withConnection( conn => {
+        val stm = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+        val rs = stm.executeQuery("SELECT * from Users.Users")
+        while (rs.next) {
+          println(rs.getString("quote"))
+        }
       }
-      result: Option[UserRow] <- addUserQuery.insertOrUpdate(newRow)
-    } yield result.getOrElse(newRow)
+      )
+    }(databaseExecutionContext)
+
   }
 
-  def listUsers(): Future[Seq[UserRow]] = db.run {
-    users.result
+  override def addOrUpdateUser(userRow: UserRow): Future[Option[UserRow]] = {
+    Future(None)(databaseExecutionContext)
+  }
+
+  override def listUsers(): Future[Seq[UserRow]] = {
+    updateSomething()
+    Future(Seq())(databaseExecutionContext)
+    //is this the right ec?
   }
 }

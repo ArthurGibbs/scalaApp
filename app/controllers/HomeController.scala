@@ -1,6 +1,7 @@
 package controllers
 
-import javax.inject._
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import play.api._
 import play.api.mvc._
 

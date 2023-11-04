@@ -5,10 +5,10 @@ import models.User
 import play.api.mvc._
 import com.cask.WritableImplicits._
 import com.google.inject.Inject
+import com.google.inject.Singleton
 import play.api.data.{Form, FormError}
 import services.UserService
 
-import javax.inject.Singleton
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
