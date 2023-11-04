@@ -23,9 +23,3 @@ libraryDependencies += "joda-time" % "joda-time" % "2.12.5"
 libraryDependencies += "com.sun.mail" % "javax.mail" % "1.6.2"
 
 libraryDependencies += "org.scalaj" %% "scalaj-http" % "2.4.2"
-
-
-//for jwt wont need
-libraryDependencies += "com.github.jwt-scala" %% "jwt-play-json" % "9.4.4"
-
-libraryDependencies += "com.typesafe.play" %% "play-json-joda" % "2.10.2"
