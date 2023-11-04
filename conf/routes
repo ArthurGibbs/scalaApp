@@ -14,6 +14,9 @@ GET     /docs                           controllers.Default.redirect(to = "/docs
 ### NoDocs ###
 GET     /docs/swagger-ui/*file          controllers.Assets.at(path:String="/public/swagger-ui", file:String)
 
+
+GET     /templates/verify               controllers.HomeController.verifyEmail()
+
 ###
 #   summary: authorize as a user
 #   tags:

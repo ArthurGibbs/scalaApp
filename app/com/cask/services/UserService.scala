@@ -5,6 +5,7 @@ import com.cask.models.user.{PersonalUser, PublicUser, ServerUser}
 import com.cask.models.Registration
 import com.google.inject.Inject
 import org.joda.time.DateTime
+import play.api.Configuration
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -12,7 +13,9 @@ import scala.util.Random
 import scala.util.matching.Regex
 
 
-class UserService @Inject() (databaseService: DatabaseService, authService: AuthService, emailUtil: EmailUtil){
+class UserService @Inject() (databaseService: DatabaseService, authService: AuthService, emailUtil: EmailUtil, config: Configuration){
+  lazy val webUrl: String = config.get[String]( "frontendUrl")
+
   def validateEmail(id: Int, code: String): Future[ServerUser] = {
     databaseService.getUserById(id).flatMap( mu => mu match {
       case Some(serverUser) => {
@@ -96,7 +99,7 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
         databaseService.saveUser(newUser).map(maybeNewUser => {
           maybeNewUser match {
             case Some(newUser) => {
-              emailUtil.sendMail("arthurgibbs@gmail.com", "has it worked", views.html.template_registration(newUser).toString())
+              emailUtil.sendMail("arthurgibbs@gmail.com", "has it worked", views.html.email.template_registration(newUser, webUrl).toString())
               maybeNewUser
             }
             case _ => throw new IllegalStateException("saving to database failed")

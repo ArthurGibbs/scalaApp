@@ -1,0 +1,63 @@
+@import com.cask.models.user.ServerUser
+@(user: ServerUser, serverUrl: String)(content: Html)
+
+<!DOCTYPE html>
+<html lang="en">
+    <body>
+        <style>
+            body{
+                padding: 24px;
+
+                display: flex;
+                justify-content: center;
+                font-family: Arial
+            }
+
+            .content{
+                padding: 24px;
+                background-color: #2b2b2b;
+                color: #cfcfd0 ;
+            }
+
+            .row{
+                display: flex;
+                flex-direction: row;
+            }
+
+            .center{
+                justify-content: center;
+            }
+
+            .code{
+                padding: 8px;
+                background-color: #1c1c1c;
+                border: solid 1px #bababa;
+                border-radius: 2px;
+                font-size: 42px;
+                color: #b81414;
+                flex-grow: 1;
+                text-align: center;
+                font-weight: bold;
+                font-family: helvetica
+            }
+
+            .link {
+                color: #a10000;
+                &:hover{
+                    color: #ef0000;
+                    text-decoration: none;
+                }
+            }
+
+
+
+
+        </style>
+        <div class="content">
+            <p>Hello <b>@{user.user.displayUser.username}</b>
+            @content
+        </div>
+    </body>
+</html>
+
+
