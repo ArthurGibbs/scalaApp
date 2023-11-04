@@ -113,7 +113,6 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
         None,
         "",
         None)
-
       val user = PersonalUser(du, registration.email, emailVerified = false)
       val newUser = ServerUser(user,
         emailValidationCode,

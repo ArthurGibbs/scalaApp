@@ -11,7 +11,7 @@ import java.sql.{PreparedStatement, ResultSet, Timestamp, Types}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
-@ImplementedBy(classOf[PostgresqlDatabaseClient])
+@ImplementedBy(classOf[MockDatabaseClient])
 trait DatabaseClient {
   def saveImage(image: Image): Future[Option[Image]]
   def getImage(id: Int): Future[Option[Image]]
@@ -31,7 +31,7 @@ trait DatabaseClient {
 }
 
 @Inject @Named("MockDatabaseClient")
-final class MockDatabaseClient @Inject()(db: Database, databaseExecutionContext: DatabaseExecutionContext) extends DatabaseClient{
+final class MockDatabaseClient @Inject()() extends DatabaseClient{
   override def addUser(userRow: ServerUser): Future[Option[ServerUser]] = Future.successful(None)
   override def updateUser(userRow: ServerUser): Future[Option[ServerUser]] = Future.successful(None)
 

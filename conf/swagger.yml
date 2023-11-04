@@ -15,4 +15,6 @@ tags:
     description: "For various action on user"
   - name: auth
     description: "For registration of new user accounts"
+  - name: test
+    description: "For testing things"
 

@@ -309,3 +309,34 @@ POST    /api/images           controllers.ImageController.upload()
 ###
 GET     /api/images/:id      controllers.ImageController.get(id)
 
+
+
+###
+#   summary: Test a save
+#   tags:
+#       - test
+#   requestBody:
+#     content:
+#        application/json:
+#          schema:
+#            type: object
+#          examples:
+#            Basic:
+#              value:
+#                username:
+#                   "123"
+#                email:
+#                   "bob@example.com"
+#                password:
+#                   "password"
+#   responses:
+#       '200':
+#         description: OK
+#         content:
+#            application/json:
+#              schema:
+#                type: DisplayUser
+###
++nocsrf
+POST     /api/registration/register                     controllers.TestController.create()
+
