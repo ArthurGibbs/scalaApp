@@ -1,8 +1,13 @@
+package com.cask
+
+import com.cask.WritableImplicits.jsonWritable
+import com.cask.models.MyError
 import play.api.http.HttpErrorHandler
-import play.api.mvc._
 import play.api.mvc.Results._
-import scala.concurrent._
+import play.api.mvc._
+
 import javax.inject.Singleton
+import scala.concurrent._
 
 @Singleton
 class ErrorHandler extends HttpErrorHandler {
@@ -14,7 +19,7 @@ class ErrorHandler extends HttpErrorHandler {
 
   def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
     Future.successful(
-      InternalServerError("A server error occurred: " + exception.getMessage)
+      InternalServerError(MyError(message = exception.getMessage))
     )
   }
 }
