@@ -116,6 +116,7 @@ GET     /api/users/isUsernameUnused/:username       controllers.AuthController.i
 #              schema:
 #                type: DisplayUser
 ###
++nocsrf
 GET     /api/users/verify-email                    controllers.AuthController.verifyEmail(id: Int, code: String)
 
 ###
@@ -174,4 +175,19 @@ GET     /api/users                      controllers.UserController.listUsers()
 #                type: option[DisplayUser]
 ###
 GET     /api/users/byName/{username}    controllers.UserController.getUserByName(username: Option[String])
+
+
+###
+#   summary: test auth
+#   tags:
+#       - users
+#   responses:
+#       '200':
+#         description: OK
+#         content:
+#            application/json:
+#              schema:
+#                type: string
+###
+GET     /api/test    controllers.UserController.test()
 

@@ -33,4 +33,8 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
       Future(BadRequest("no username supplied"))
     }
   }
+
+  def test() = Action.async { implicit request: Request[AnyContent] =>
+
+  }
 }

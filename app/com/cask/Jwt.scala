@@ -7,7 +7,6 @@ import play.api.libs.json.{JsObject, JsValue}
 
 import scala.util.{Failure, Success}
 
-
 class Jwt @Inject() (config: Configuration){
   val secret = config.get[String]( "jwt.secret")
   val algo = JwtAlgorithm.HS256

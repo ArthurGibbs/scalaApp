@@ -78,7 +78,10 @@ class AuthController @Inject()(val controllerComponents: ControllerComponents, u
           case (Some(usernameOrEmail),  Some(password)) => {
             authService.login(usernameOrEmail, password).map(mt => mt match {
               case Some(t) => {
-                Ok(t._2)
+                Ok(t._1.toDisplay()).withHeaders(
+                  ("Set-Cookie", t._2))
+                  .withCookies(Cookie("jwt",t._2,None,"/",None, false, true, Some(Cookie.SameSite.Lax )))
+                  .withSession(request.session + ("saidHello" -> "yes"))
               }
               case _ => {Unauthorized("")}
             })
