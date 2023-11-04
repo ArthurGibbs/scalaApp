@@ -6,7 +6,7 @@ import com.cask.services.{AuthService, UserService}
 import com.cask.{I18nSupport, Logging}
 import com.google.inject.{Inject, Singleton}
 import play.api.data.{Form, FormError}
-import play.api.libs.json.{JsString, JsValue, Json}
+import play.api.libs.json.{JsBoolean, JsObject, JsString, JsValue, Json}
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,7 +29,7 @@ class RegistrationController @Inject()(val controllerComponents: ControllerCompo
       log.debug(s"Received registration form for ${registration.username}, ${registration.email}")
       userService.registerUser(registration).map(maybeUser =>
         maybeUser match {
-          case Some(user) => Ok(user.toSelfDisplay())
+          case Some(user) => Ok(user.user)
           case _ => InternalServerError("Registration Failed")
         }
       )
@@ -40,15 +40,29 @@ class RegistrationController @Inject()(val controllerComponents: ControllerCompo
   }
 
   def isUsernameUnused(username: String) = Action.async { implicit request: Request[AnyContent] =>
-      userService.isUsernameUnused(username).map(result => Ok(result))
+      userService.isUsernameUnused(username).map(result => {
+        Ok(JsObject(
+          Seq(
+            "username" -> JsString(username),
+            "available" -> JsBoolean(result)
+          )
+        ))
+      })
   }
 
   def isEmailUnused(email: String) = Action.async { implicit request: Request[AnyContent] =>
-    userService.isEmailUnused(email).map(result => Ok(result))
+    userService.isEmailUnused(email).map(result => {
+      Ok(JsObject(
+        Seq(
+          "email" -> JsString(email),
+          "available" -> JsBoolean(result)
+        )
+    ))}
+    )
   }
 
   def verifyEmail(id: Int, code: String) = Action.async { implicit request: Request[AnyContent] =>
-    userService.validateEmail(id, code).map(user => Ok(user.toDisplay()))
+    userService.validateEmail(id, code).map(user => Ok(user.user.displayUser))
   }
 
 }

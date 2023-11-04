@@ -3,7 +3,7 @@ package com.cask.services
 import com.cask.Jwt
 import com.cask.db.DatabaseService
 import com.cask.errors.RedirectingUnauthorizedException
-import com.cask.models.{SessionData, User}
+import com.cask.models.{SessionData, ServerUser}
 import com.google.common.hash.Hashing
 import com.google.inject.Inject
 import play.api.Configuration
@@ -38,7 +38,7 @@ class AuthService @Inject() (config: Configuration, databaseService: DatabaseSer
             //todo get roles
             val roles = Seq()
 
-            Some((SessionData(claimedUser.toDisplay(), roles)))
+            Some((SessionData(claimedUser.user.displayUser, roles)))
           } else {
             None
           }

@@ -1,13 +1,12 @@
 package com.cask.db
 
-import com.cask.db.dso.UserDSO
+import com.cask.models.{DisplayUser, ServerUser, User}
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Inject}
 import org.joda.time.DateTime
 import play.api.db.Database
 
-import java.sql.Types
-import java.sql.{ResultSet, Timestamp}
+import java.sql.{PreparedStatement, ResultSet, Timestamp, Types}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
@@ -15,29 +14,27 @@ import scala.concurrent.Future
 trait DatabaseClient {
   //registration
   def isEmailUnused(email: String): Future[Boolean]
-
-
   def isUsernameUnused(username: String): Future[Boolean]
   //Users
-  def addUser(userRow: UserDSO): Future[Option[UserDSO]]
+  def addUser(userRow: ServerUser): Future[Option[ServerUser]]
 
-  def updateUser(userRow: UserDSO): Future[Option[UserDSO]]
-  def listUsers(): Future[Seq[UserDSO]]
+  def updateUser(userRow: ServerUser): Future[Option[ServerUser]]
+  def listUsers(): Future[Seq[ServerUser]]
 
-  def getUserByName(username: String): Future[Option[UserDSO]]
-  def getUserById(id: Int): Future[Option[UserDSO]]
-  def getUserByEmail(email: String): Future[Option[UserDSO]]
+  def getUserByName(username: String): Future[Option[ServerUser]]
+  def getUserById(id: Int): Future[Option[ServerUser]]
+  def getUserByEmail(email: String): Future[Option[ServerUser]]
 }
 
 @Inject @Named("MockDatabaseClient")
 final class MockDatabaseClient @Inject()(db: Database, databaseExecutionContext: DatabaseExecutionContext) extends DatabaseClient{
-  override def addUser(userRow: UserDSO): Future[Option[UserDSO]] = Future.successful(None)
-  override def updateUser(userRow: UserDSO): Future[Option[UserDSO]] = Future.successful(None)
+  override def addUser(userRow: ServerUser): Future[Option[ServerUser]] = Future.successful(None)
+  override def updateUser(userRow: ServerUser): Future[Option[ServerUser]] = Future.successful(None)
 
-  override def listUsers(): Future[Seq[UserDSO]] = Future.successful(Seq())
-  override def getUserByName(username: String): Future[Option[UserDSO]] = Future.successful(None)
-  override def getUserById(id: Int): Future[Option[UserDSO]] = Future.successful(None)
-  override def getUserByEmail(email: String): Future[Option[UserDSO]] = Future.successful(None)
+  override def listUsers(): Future[Seq[ServerUser]] = Future.successful(Seq())
+  override def getUserByName(username: String): Future[Option[ServerUser]] = Future.successful(None)
+  override def getUserById(id: Int): Future[Option[ServerUser]] = Future.successful(None)
+  override def getUserByEmail(email: String): Future[Option[ServerUser]] = Future.successful(None)
 
   override def isEmailUnused(email: String): Future[Boolean] = Future.successful(true)
   override def isUsernameUnused(username: String): Future[Boolean] = Future.successful(true)
@@ -46,100 +43,62 @@ final class MockDatabaseClient @Inject()(db: Database, databaseExecutionContext:
 @Inject @Named("PostgresqlDatabaseClient")
 final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionContext: DatabaseExecutionContext) extends DatabaseClient{
 
-  override def addUser(userDSO: UserDSO): Future[Option[UserDSO]] = {
+  override def addUser(serverUser: ServerUser): Future[Option[ServerUser]] = {
     Future {
       db.withConnection( conn => {
-        //val stm = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
         val stm = conn.prepareStatement("INSERT into Users.Users(" +
           "username, email, email_verified, email_verification_code, " +
           "hash, salt, profile_image_id, created_on, last_seen, gender, bio, bio_updated) " +
           "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;",
           ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
-        stm.setString(1, userDSO.username)
-        stm.setString(2, userDSO.email)
-        stm.setBoolean(3, userDSO.emailVerified)
-        stm.setString(4, userDSO.emailVerificationCode)
-        stm.setString(5, userDSO.hash)
-        stm.setString(6, userDSO.salt)
-        if (userDSO.profileImageId.isDefined) {
-          stm.setInt(7, userDSO.profileImageId.get)
-        } else {
-          stm.setNull(7, java.sql.Types.INTEGER)
-        }
-        stm.setTimestamp(8, new Timestamp(userDSO.createdOn.getMillis()))
-        stm.setTimestamp(9, new Timestamp(userDSO.lastSeen.getMillis()))
-
-        if (userDSO.gender.isDefined) {
-          stm.setString(10, userDSO.gender.get)
-        } else {
-          stm.setNull(10, java.sql.Types.VARCHAR)
-        }
-
-        stm.setString(11, userDSO.bio)
-
-        if (userDSO.bioUpdated.isDefined) {
-          stm.setTimestamp(12, new Timestamp(userDSO.bioUpdated.get.getMillis()))
-        } else {
-          stm.setNull(12, java.sql.Types.TIMESTAMP)
-        }
+        stm.setString(1, serverUser.user.displayUser.username)
+        stm.setString(2, serverUser.user.email)
+        stm.setBoolean(3, serverUser.user.emailVerified)
+        stm.setString(4, serverUser.emailVerificationCode)
+        stm.setString(5, serverUser.hash)
+        stm.setString(6, serverUser.salt)
+        setOptionalInt(stm,7,serverUser.user.displayUser.profileImageId)
+        stm.setTimestamp(8, new Timestamp(serverUser.user.displayUser.createdOn.getMillis()))
+        stm.setTimestamp(9, new Timestamp(serverUser.user.displayUser.lastSeen.getMillis()))
+        setOptionalString(stm,10,serverUser.user.displayUser.gender)
+        stm.setString(11, serverUser.user.displayUser.bio)
+        setOptionalDateTime(stm,12,serverUser.user.displayUser.bioUpdated)
 
         val rs = stm.executeQuery
 
         if (rs.next) {
-          Some(UserDSO(
-            Some(rs.getInt("id")),
-            rs.getString("username"),
-            rs.getString("email"),
-            rs.getBoolean("email_verified"),
-            rs.getString("email_verification_code"),
-            rs.getString("hash"),
-            rs.getString("salt"),
-            Some(rs.getInt("profile_image_id")),
-            new DateTime(rs.getTimestamp("created_on")),
-            new DateTime(rs.getTimestamp("last_seen")),
-            Some(rs.getString("gender")),
-            rs.getString("bio"),
-            Some(new DateTime(rs.getTimestamp("bio_updated")))
-          ))
+          val du = DisplayUser.fromResultSet(rs)
+          val user = User.fromResultSet(rs,du)
+          val su = ServerUser.fromResultSet(rs,user)
+          Some(su)
         } else {
           None
         }
+
       })
     }(databaseExecutionContext)
   }
 
-  override def listUsers(): Future[Seq[UserDSO]] = {
+  override def listUsers(): Future[Seq[ServerUser]] = {
     Future {
       db.withConnection( conn => {
-        //val stm = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
         val stm = conn.prepareStatement("Select * From Users.Users;",
           ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
         val rs = stm.executeQuery
 
-        val list: ListBuffer[UserDSO] = ListBuffer()
+        val list: ListBuffer[ServerUser] = ListBuffer()
         while (rs.next) {
-          list += UserDSO(
-            Some(rs.getInt("id")),
-            rs.getString("username"),
-            rs.getString("email"),
-            rs.getBoolean("email_verified"),
-            rs.getString("email_verification_code"),
-            rs.getString("hash"),
-            rs.getString("salt"),
-            Some(rs.getInt("profile_image_id")),
-            new DateTime(rs.getTimestamp("created_on")),
-            new DateTime(rs.getTimestamp("last_seen")),
-            Some(rs.getString("gender")),
-            rs.getString("bio"),
-            Some(new DateTime(rs.getTimestamp("bio_updated")))
-          )
+          val du = DisplayUser.fromResultSet(rs)
+          val user = User.fromResultSet(rs,du)
+          val su = ServerUser.fromResultSet(rs,user)
+          list += su
         }
         list.toList
       })
     }(databaseExecutionContext)
   }
 
-  override def getUserByName(username: String): Future[Option[UserDSO]] = {
+  override def getUserByName(username: String): Future[Option[ServerUser]] = {
     Future {
       db.withConnection( conn => {
         val stm = conn.prepareStatement("Select * From Users.Users WHERE Users.username = ?",
@@ -147,23 +106,11 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
         stm.setString(1, username)
         val rs = stm.executeQuery
 
-        val list: ListBuffer[UserDSO] = ListBuffer()
         if (rs.next) {
-          Some(UserDSO(
-            Some(rs.getInt("id")),
-            rs.getString("username"),
-            rs.getString("email"),
-            rs.getBoolean("email_verified"),
-            rs.getString("email_verification_code"),
-            rs.getString("hash"),
-            rs.getString("salt"),
-            Some(rs.getInt("profile_image_id")),
-            new DateTime(rs.getTimestamp("created_on")),
-            new DateTime(rs.getTimestamp("last_seen")),
-            Some(rs.getString("gender")),
-            rs.getString("bio"),
-            Some(new DateTime(rs.getTimestamp("bio_updated")))
-          ))
+          val du = DisplayUser.fromResultSet(rs)
+          val user = User.fromResultSet(rs,du)
+          val su = ServerUser.fromResultSet(rs,user)
+          Some(su)
         } else {
           None
         }
@@ -203,7 +150,7 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
     }(databaseExecutionContext)
   }
 
-  override def getUserById(id: Int): Future[Option[UserDSO]] = {
+  override def getUserById(id: Int): Future[Option[ServerUser]] = {
     Future {
       db.withConnection( conn => {
         val stm = conn.prepareStatement("Select * From Users.Users WHERE Users.id = ?",
@@ -212,21 +159,10 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
         val rs = stm.executeQuery
 
         if (rs.next) {
-          Some(UserDSO(
-            Some(rs.getInt("id")),
-            rs.getString("username"),
-            rs.getString("email"),
-            rs.getBoolean("email_verified"),
-            rs.getString("email_verification_code"),
-            rs.getString("hash"),
-            rs.getString("salt"),
-            Some(rs.getInt("profile_image_id")),
-            new DateTime(rs.getTimestamp("created_on")),
-            new DateTime(rs.getTimestamp("last_seen")),
-            Some(rs.getString("gender")),
-            rs.getString("bio"),
-            Some(new DateTime(rs.getTimestamp("bio_updated")))
-          ))
+          val du = DisplayUser.fromResultSet(rs)
+          val user = User.fromResultSet(rs,du)
+          val su = ServerUser.fromResultSet(rs,user)
+          Some(su)
         } else {
           None
         }
@@ -234,7 +170,7 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
     }(databaseExecutionContext)
   }
 
-  override def updateUser(userDSO: UserDSO): Future[Option[UserDSO]] = {
+  override def updateUser(serverUser: ServerUser): Future[Option[ServerUser]] = {
     Future {
       db.withConnection( conn => {
         //val stm = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
@@ -243,54 +179,28 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
           "hash = ?,  salt = ?, profile_image_id = ?, created_on = ?, last_seen = ?, gender = ?, bio = ?, bio_updated = ? " +
           "WHERE Users.id = ? RETURNING *;",
           ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
-        stm.setString(1, userDSO.username)
-        stm.setString(2, userDSO.email)
-        stm.setBoolean(3, userDSO.emailVerified)
-        stm.setString(4, userDSO.emailVerificationCode)
-        stm.setString(5, userDSO.hash)
-        stm.setString(6, userDSO.salt)
-        if (userDSO.profileImageId.isDefined) {
-          stm.setInt(7, userDSO.profileImageId.get)
-        } else {
-          stm.setNull(7, java.sql.Types.INTEGER)
-        }
-        stm.setTimestamp(8, new Timestamp(userDSO.createdOn.getMillis()))
-        stm.setTimestamp(9, new Timestamp(userDSO.lastSeen.getMillis()))
-
-        if (userDSO.gender.isDefined) {
-          stm.setString(10, userDSO.gender.get)
-        } else {
-          stm.setNull(10, java.sql.Types.VARCHAR)
-        }
-
-        stm.setString(11, userDSO.bio)
-
-        if (userDSO.bioUpdated.isDefined) {
-          stm.setTimestamp(12, new Timestamp(userDSO.bioUpdated.get.getMillis()))
-        } else {
-          stm.setNull(12, java.sql.Types.TIMESTAMP)
-        }
-        stm.setInt(13, userDSO.id.getOrElse(0))
+        stm.setString(1, serverUser.user.displayUser.username)
+        stm.setString(2, serverUser.user.email)
+        stm.setBoolean(3, serverUser.user.emailVerified)
+        stm.setString(4, serverUser.emailVerificationCode)
+        stm.setString(5, serverUser.hash)
+        stm.setString(6, serverUser.salt)
+        setOptionalInt(stm,7,serverUser.user.displayUser.profileImageId)
+        stm.setTimestamp(8, new Timestamp(serverUser.user.displayUser.createdOn.getMillis()))
+        stm.setTimestamp(9, new Timestamp(serverUser.user.displayUser.lastSeen.getMillis()))
+        setOptionalString(stm,10,serverUser.user.displayUser.gender)
+        stm.setString(11, serverUser.user.displayUser.bio)
+        setOptionalDateTime(stm,12,serverUser.user.displayUser.bioUpdated)
+        stm.setInt(13, serverUser.user.displayUser.id.getOrElse(0))//todo prevent user id 0
 
 
         val rs = stm.executeQuery
 
         if (rs.next) {
-          Some(UserDSO(
-            Some(rs.getInt("id")),
-            rs.getString("username"),
-            rs.getString("email"),
-            rs.getBoolean("email_verified"),
-            rs.getString("email_verification_code"),
-            rs.getString("hash"),
-            rs.getString("salt"),
-            Some(rs.getInt("profile_image_id")),
-            new DateTime(rs.getTimestamp("created_on")),
-            new DateTime(rs.getTimestamp("last_seen")),
-            Some(rs.getString("gender")),
-            rs.getString("bio"),
-            Some(new DateTime(rs.getTimestamp("bio_updated")))
-          ))
+          val du = DisplayUser.fromResultSet(rs)
+          val user = User.fromResultSet(rs,du)
+          val su = ServerUser.fromResultSet(rs,user)
+          Some(su)
         } else {
           None
         }
@@ -298,7 +208,7 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
     }(databaseExecutionContext)
   }
 
-  override def getUserByEmail(email: String): Future[Option[UserDSO]] = {
+  override def getUserByEmail(email: String): Future[Option[ServerUser]] = {
     Future {
       db.withConnection( conn => {
         val stm = conn.prepareStatement("Select * From Users.Users WHERE Users.email = ?",
@@ -307,25 +217,36 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
         val rs = stm.executeQuery
 
         if (rs.next) {
-          Some(UserDSO(
-            Some(rs.getInt("id")),
-            rs.getString("username"),
-            rs.getString("email"),
-            rs.getBoolean("email_verified"),
-            rs.getString("email_verification_code"),
-            rs.getString("hash"),
-            rs.getString("salt"),
-            Some(rs.getInt("profile_image_id")),
-            new DateTime(rs.getTimestamp("created_on")),
-            new DateTime(rs.getTimestamp("last_seen")),
-            Some(rs.getString("gender")),
-            rs.getString("bio"),
-            Some(new DateTime(rs.getTimestamp("bio_updated")))
-          ))
+          val du = DisplayUser.fromResultSet(rs)
+          val user = User.fromResultSet(rs,du)
+          val su = ServerUser.fromResultSet(rs,user)
+          Some(su)
         } else {
           None
         }
       })
     }(databaseExecutionContext)
   }
+
+  private def setOptionalInt(stm: PreparedStatement, position: Int, value: Option[Int]) = {
+    value match {
+      case Some(int) => stm.setInt(position, int)
+      case _ => stm.setNull(position, java.sql.Types.INTEGER)
+    }
+  }
+
+  private def setOptionalString(stm: PreparedStatement, position: Int, value: Option[String]) = {
+    value match {
+      case Some(string) => stm.setString(position, string)
+      case _ => stm.setNull(position, java.sql.Types.VARCHAR)
+    }
+  }
+
+  private def setOptionalDateTime(stm: PreparedStatement, position: Int, value: Option[DateTime]) = {
+    value match {
+      case Some(dateTime) =>    stm.setTimestamp(position, new Timestamp(dateTime.getMillis()))
+      case _ => stm.setNull(position, java.sql.Types.TIMESTAMP)
+    }
+  }
+
 }

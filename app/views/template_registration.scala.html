@@ -1,10 +1,10 @@
-@import com.cask.models.User
+@import com.cask.models.ServerUser
 @import java.net.URLEncoder
-@(user: User)
+@(user: ServerUser)
 
-<p>Hello <b>@{user.username}</b> </p>
+<p>Hello <b>@{user.user.displayUser.username}</b> </p>
 <p>your new account is almost ready</p>
-<p>to validate your email please click on the link <a href="http://cask.com/api/validateEmail?id=@{URLEncoder.encode(user.id.getOrElse(0).toString)}&code=@{URLEncoder.encode(user.emailVerificationCode)}">here</a></p>
+<p>to validate your email please click on the link <a href="http://cask.com/api/validateEmail?id=@{URLEncoder.encode(user.user.displayUser.id.getOrElse(0).toString)}&code=@{URLEncoder.encode(user.emailVerificationCode)}">here</a></p>
 <p>If this was not you, you can safely ignore this email</p>
 
 

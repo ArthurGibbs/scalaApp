@@ -16,7 +16,7 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
   def listUsers() = secureAction.async { implicit request: Request[AnyContent] =>
 
       userService.listUsers().map(users =>
-        Ok(users.map(_.toDisplay()))
+        Ok(users.map(_.user.displayUser))
       )
   }
 
@@ -24,7 +24,7 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
     if (username.isDefined) {
       userService.getUserByName(username.get).map( user =>
         user match {
-          case Some(user) => Ok(user.toDisplay())
+          case Some(user) => Ok(user.user.displayUser)
           case _ => NotFound("")
         }
       )

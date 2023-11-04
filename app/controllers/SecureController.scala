@@ -15,6 +15,6 @@ class SecureController @Inject()(val controllerComponents: ControllerComponents,
   def test() = Action.async { implicit request: Request[AnyContent] =>
         val sessionData = AuthService.getAuthorizedUserData()(request.session)
 
-        Future(Ok(sessionData.user.name))
+        Future(Ok(sessionData.user.username))
   }
 }

@@ -43,13 +43,12 @@ class AuthController @Inject()(val controllerComponents: ControllerComponents, u
   }
 
   def logout() = Action { implicit request: Request[AnyContent] =>
-    val json: JsObject = JsObject(
+    Ok(JsObject(
       Seq(
-        "message"     -> JsString("Success"),
+        "message" -> JsString("Success"),
         "redirectUrl" -> JsString("/login"),
       )
-    )
-    Ok(json).withNewSession
+    )).withNewSession
   }
 
 }

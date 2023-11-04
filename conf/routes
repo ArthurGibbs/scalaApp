@@ -124,7 +124,7 @@ GET     /api/registration/isEmailUnused/:email            controllers.Registrati
 #                type: DisplayUser
 ###
 +nocsrf
-POST     /api/registration                     controllers.RegistrationController.registerUser()
+POST     /api/registration/register                     controllers.RegistrationController.registerUser()
 
 ###
 #   summary: finds if email is unused

@@ -1,21 +1,22 @@
 package com.cask.services
 
 import com.cask.db.DatabaseService
-import com.cask.models.{Registration, User}
+import com.cask.models.{DisplayUser, Registration, ServerUser, User}
 import com.google.inject.Inject
 import org.joda.time.DateTime
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Random
+import scala.util.matching.Regex
 
 
 class UserService @Inject() (databaseService: DatabaseService, authService: AuthService, emailUtil: EmailUtil){
-  def validateEmail(id: Int, code: String): Future[User] = {
+  def validateEmail(id: Int, code: String): Future[ServerUser] = {
     databaseService.getUserById(id).flatMap( mu => mu match {
-      case Some(user) => {
-        if(user.emailVerificationCode == code){
-          val updatedUser = user.copy(emailVerified = true)
+      case Some(serverUser) => {
+        if(serverUser.emailVerificationCode == code){
+          val updatedUser = serverUser.copy(user = serverUser.user.copy(emailVerified = true))
 
           databaseService.updateUser(updatedUser).map(mu => mu match {
             case Some(user) => user
@@ -38,18 +39,30 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
     databaseService.isUsernameUnused(username)
   }
 
-  def getUserByName(username: String): Future[Option[User]] = {
+  def getUserByName(username: String): Future[Option[ServerUser]] = {
     databaseService.getUserByName(username)
   }
-  def getUserById(id: Int): Future[Option[User]] = {
+  def getUserById(id: Int): Future[Option[ServerUser]] = {
     databaseService.getUserById(id)
   }
-  def getUserByEmail(email: String): Future[Option[User]] = {
+  def getUserByEmail(email: String): Future[Option[ServerUser]] = {
     databaseService.getUserByEmail(email)
   }
 
 
-  def registerUser(registration: Registration): Future[Option[User]] = {
+  def registerUser(registration: Registration): Future[Option[ServerUser]] = {
+    val emailPattern: Regex = "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,63})$".r
+    emailPattern.findFirstMatchIn(registration.email) match {
+      case Some(_) => {}
+      case None => throw new IllegalStateException("Invalid Email")
+    }
+
+    val usernamePattern: Regex = "^([a-zA-Z0-9_\\-\\.]+)$".r
+    usernamePattern.findFirstMatchIn(registration.username) match {
+      case Some(_) => {}
+      case None => throw new IllegalStateException("Invalid username must match ^([a-zA-Z0-9_\\-\\.]+)$")
+    }
+
     val result: Future[(Boolean, Boolean)] = for {
       usernameFree <- databaseService.isUsernameUnused(registration.username)
       emailFree <- databaseService.isEmailUnused(registration.username)
@@ -63,20 +76,21 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
       val userSalt = Iterator.continually(Random.nextPrintableChar()).filter(_.isLetterOrDigit).take(64).mkString
       val emailValidationCode = Iterator.continually(Random.nextPrintableChar()).filter(_.isLetterOrDigit).take(8).mkString
       val hash = authService.getHashedPassword(registration.password, userSalt)
-      val newUser = User(
+      val du = DisplayUser(
         None,
         registration.username,
-        registration.email,
-        false,
-        emailValidationCode,
-        hash,
-        userSalt,
         None,
         DateTime.now(),
         DateTime.now(),
         None,
         "",
         None)
+
+      val user = User(du, registration.email, emailVerified = false)
+      val newUser = ServerUser(user,
+        emailValidationCode,
+        hash,
+        userSalt)
 
         databaseService.saveUser(newUser).map(maybeNewUser => {
           maybeNewUser match {
@@ -94,7 +108,7 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
   resultingUser
   }
 
-  def listUsers() : Future[Seq[User]] = {
+  def listUsers() : Future[Seq[ServerUser]] = {
     databaseService.listUsers()
   }
 

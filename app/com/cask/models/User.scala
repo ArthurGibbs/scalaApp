@@ -1,29 +1,34 @@
 package com.cask.models
 
-import org.joda.time.DateTime
+import play.api.libs.json.{Json, Reads, Writes}
+
+import java.sql.ResultSet
 
 case class User(
-              id: Option[Int] = None,
-              username: String,
-              email: String,
-              emailVerified: Boolean,
-              emailVerificationCode: String,
-              hash: String,
-              salt: String,
-              profileImageId: Option[Int],
-              createdOn: DateTime,
-              lastSeen: DateTime,
-              gender: Option[String],
-              bio: String,
-              bioUpdated: Option[DateTime]) {
+  displayUser: DisplayUser,
+  email: String,
+  emailVerified: Boolean
+               )
 
-  def toDisplay():DisplayUser = {
-    DisplayUser(id.getOrElse(0), username, "")
-  }
-  def toSelfDisplay():DisplayUser = {
-    DisplayUser(id.getOrElse(0), username, email)
+object User {
+
+  implicit val UserWrites: Writes[User] = Json.writes[User]
+  implicit val UserReads: Reads[User] = Json.reads[User]
+
+  def fromResultSet(rs: ResultSet, du: DisplayUser): User = {
+    User(
+      du,
+      rs.getString("email"),
+      rs.getBoolean("email_verified")
+    )
   }
 }
+
+
+
+
+
+
 
 
 
