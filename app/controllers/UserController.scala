@@ -28,8 +28,8 @@ class UserController @Inject()(val controllerComponents: ControllerComponents) e
   }
 
   def getExample() = Action { implicit request: Request[AnyContent] =>
-    val user1 : UserRegistration = new UserRegistration("ian", "ian@gmail.com", "123")
-    val user2 : UserRegistration = new UserRegistration("asdfasdf", "asdfasdf@gmail.com", "1233123")
+    val user1 : UserRegistration = new UserRegistration(name= "ian", email = "ian@gmail.com", hash ="123")
+    val user2 : UserRegistration = new UserRegistration(name= "asdfasdf", email = "asdfasdf@gmail.com", hash ="1233123")
     val list: List[UserRegistration] = List(user1, user2)
     Ok(list)
   }
