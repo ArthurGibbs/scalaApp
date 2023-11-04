@@ -5,7 +5,7 @@
 
 # landing page for the api
 GET     /                               controllers.HomeController.index()
-GET     /test                           controllers.RegistrationController.test()
+GET     /test                           controllers.AuthController.test()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                   controllers.Assets.versioned(path="/public", file: Asset)
@@ -42,7 +42,34 @@ GET     /docs/swagger-ui/*file          controllers.Assets.at(path:String="/publ
 #                type: DisplayUser
 ###
 +nocsrf
-POST     /api/users                     controllers.RegistrationController.registerUser()
+POST     /api/users                     controllers.AuthController.registerUser()
+
+###
+#   summary: post a user
+#   tags:
+#       - registration
+#   requestBody:
+#     content:
+#        application/json:
+#          schema:
+#            type: object
+#          examples:
+#            Basic:
+#              value:
+#                usernameOrEmail:
+#                   "123"
+#                password:
+#                   "password"
+#   responses:
+#       '200':
+#         description: OK
+#         content:
+#            application/json:
+#              schema:
+#                type: DisplayUser
+###
++nocsrf
+POST     /api/users/login                     controllers.AuthController.login()
 
 ###
 #   summary: finds if username is free
@@ -64,7 +91,7 @@ POST     /api/users                     controllers.RegistrationController.regis
 #                type: boolean
 ###
 +nocsrf
-GET     /api/users/isUsernameUnused/:username       controllers.RegistrationController.isUsernameUnused(username: String)
+GET     /api/users/isUsernameUnused/:username       controllers.AuthController.isUsernameUnused(username: String)
 
 ###
 #   summary: finds if email is unused
@@ -89,7 +116,7 @@ GET     /api/users/isUsernameUnused/:username       controllers.RegistrationCont
 #              schema:
 #                type: DisplayUser
 ###
-GET     /api/users/verify-email                    controllers.RegistrationController.verifyEmail(id: Int, code: String)
+GET     /api/users/verify-email                    controllers.AuthController.verifyEmail(id: Int, code: String)
 
 ###
 #   summary: finds if email is unused
@@ -111,7 +138,7 @@ GET     /api/users/verify-email                    controllers.RegistrationContr
 #                type: boolean
 ###
 +nocsrf
-GET     /api/users/isEmailUnused/:email            controllers.RegistrationController.isEmailUnused(email: String)
+GET     /api/users/isEmailUnused/:email            controllers.AuthController.isEmailUnused(email: String)
 
 ###
 #   summary: gets a list of users

@@ -8,6 +8,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class  DatabaseService @Inject() (databaseClient: DatabaseClient){
+
   def updateUser(user: User): Future[Option[User]] = {
     databaseClient.updateUser(DSOFromDTO(user)).map(_.map(DTOFromDSO))
   }
@@ -23,7 +24,9 @@ case class  DatabaseService @Inject() (databaseClient: DatabaseClient){
   def getUserByName(username: String): Future[Option[User]] = {
     databaseClient.getUserByName(username).map(_.map(DTOFromDSO))
   }
-
+  def getUserByEmail(email: String): Future[Option[User]]  = {
+    databaseClient.getUserByEmail(email).map(_.map(DTOFromDSO))
+  }
   def getUserById(id: Int): Future[Option[User]] = {
     databaseClient.getUserById(id).map(_.map(DTOFromDSO))
   }

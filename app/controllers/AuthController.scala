@@ -2,17 +2,18 @@ package controllers
 
 import com.cask.WritableImplicits._
 import com.cask.models.{Registration, User}
-import com.cask.services.UserService
+import com.cask.services.{AuthService, UserService}
 import com.cask.{I18nSupport, Logging}
 import com.google.inject.{Inject, Singleton}
 import play.api.data.{Form, FormError}
+import play.api.libs.json.{JsString, JsValue, Json}
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class RegistrationController @Inject()(val controllerComponents: ControllerComponents, userService: UserService) extends BaseController with I18nSupport with Logging {
+class AuthController @Inject()(val controllerComponents: ControllerComponents, userService: UserService, authService: AuthService) extends BaseController with I18nSupport with Logging {
 
   def registerUser = Action.async { implicit request: Request[AnyContent] =>
     def onError(formWithErrors: Form[Registration]): Future[Result] = {
@@ -38,7 +39,6 @@ class RegistrationController @Inject()(val controllerComponents: ControllerCompo
     userRegistrationResult.fold(onError, onSuccess)
   }
 
-
   def test() = Action.async { implicit request: Request[AnyContent] =>
     userService.getUserByName("123").map(mu => {
       mu match {
@@ -59,5 +59,32 @@ class RegistrationController @Inject()(val controllerComponents: ControllerCompo
 
   def verifyEmail(id: Int, code: String) = Action.async { implicit request: Request[AnyContent] =>
     userService.validateEmail(id, code).map(user => Ok(user.toDisplay()))
+  }
+
+  def login() = Action.async { implicit request: Request[AnyContent] =>
+    val maybeJson: Option[JsValue] = request.body.asJson
+    maybeJson match {
+      case Some(json) => {
+        val maybeUsernameOrEmail = (json \ "usernameOrEmail").toOption.flatMap(jsv => jsv match {
+          case JsString(usernameOrEmail) => Some(usernameOrEmail)
+          case _ => None
+        })
+        val maybePassword = (json \ "password").toOption.flatMap(jsv => jsv match {
+          case JsString(password) => Some(password)
+          case _ => None
+        })
+        (maybeUsernameOrEmail, maybePassword) match {
+          case (Some(usernameOrEmail),  Some(password)) => {
+            authService.login(usernameOrEmail, password).map(mt => mt match {
+              case Some(t) => {Ok(t)}
+              case _ => {Unauthorized("")}
+            })
+
+          }
+          case _ => throw new IllegalStateException("Missing username and or password")
+        }
+      }
+      case _ => throw new IllegalStateException("Body is invalid json")
+    }
   }
 }

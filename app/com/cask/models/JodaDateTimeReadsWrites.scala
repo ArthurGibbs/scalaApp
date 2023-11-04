@@ -4,9 +4,8 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{JsString, JsValue, Reads, Writes}
 
-class JodaDateTimeReadsWrites {
+class JodaDateTimeReadsWrites {}
 
-}
 object JodaDateTimeReadsWrites {
   val dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
 

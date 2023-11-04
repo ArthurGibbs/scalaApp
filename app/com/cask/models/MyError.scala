@@ -11,5 +11,4 @@ object MyError {
     implicit val MyErrorWrites: Writes[MyError] =
       (JsPath \ "error").write[String]
         .and((JsPath \ "time").write[DateTime](jodaDateWrites))(unlift(MyError.unapply))
-
 }

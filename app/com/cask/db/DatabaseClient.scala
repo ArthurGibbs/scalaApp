@@ -13,20 +13,20 @@ import scala.concurrent.Future
 
 @ImplementedBy(classOf[PostgresqlDatabaseClient])
 trait DatabaseClient {
-
-
   //registration
   def isEmailUnused(email: String): Future[Boolean]
-  def isUsernameUnused(username: String): Future[Boolean]
 
+
+  def isUsernameUnused(username: String): Future[Boolean]
   //Users
   def addUser(userRow: UserDSO): Future[Option[UserDSO]]
-  def updateUser(userRow: UserDSO): Future[Option[UserDSO]]
 
+  def updateUser(userRow: UserDSO): Future[Option[UserDSO]]
   def listUsers(): Future[Seq[UserDSO]]
 
   def getUserByName(username: String): Future[Option[UserDSO]]
   def getUserById(id: Int): Future[Option[UserDSO]]
+  def getUserByEmail(email: String): Future[Option[UserDSO]]
 }
 
 @Inject @Named("MockDatabaseClient")
@@ -36,10 +36,10 @@ final class MockDatabaseClient @Inject()(db: Database, databaseExecutionContext:
 
   override def listUsers(): Future[Seq[UserDSO]] = Future.successful(Seq())
   override def getUserByName(username: String): Future[Option[UserDSO]] = Future.successful(None)
-
   override def getUserById(id: Int): Future[Option[UserDSO]] = Future.successful(None)
-  override def isEmailUnused(email: String): Future[Boolean] = Future.successful(true)
+  override def getUserByEmail(email: String): Future[Option[UserDSO]] = Future.successful(None)
 
+  override def isEmailUnused(email: String): Future[Boolean] = Future.successful(true)
   override def isUsernameUnused(username: String): Future[Boolean] = Future.successful(true)
 }
 
@@ -273,6 +273,37 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
         stm.setInt(13, userDSO.id.getOrElse(0))
 
 
+        val rs = stm.executeQuery
+
+        if (rs.next) {
+          Some(UserDSO(
+            Some(rs.getInt("id")),
+            rs.getString("username"),
+            rs.getString("email"),
+            rs.getBoolean("email_verified"),
+            rs.getString("email_verification_code"),
+            rs.getString("hash"),
+            rs.getString("salt"),
+            Some(rs.getInt("profile_image_id")),
+            new DateTime(rs.getTimestamp("created_on")),
+            new DateTime(rs.getTimestamp("last_seen")),
+            Some(rs.getString("gender")),
+            rs.getString("bio"),
+            Some(new DateTime(rs.getTimestamp("bio_updated")))
+          ))
+        } else {
+          None
+        }
+      })
+    }(databaseExecutionContext)
+  }
+
+  override def getUserByEmail(email: String): Future[Option[UserDSO]] = {
+    Future {
+      db.withConnection( conn => {
+        val stm = conn.prepareStatement("Select * From Users.Users WHERE Users.email = ?",
+          ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+        stm.setString(1, email)
         val rs = stm.executeQuery
 
         if (rs.next) {

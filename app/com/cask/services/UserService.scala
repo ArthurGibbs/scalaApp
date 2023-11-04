@@ -34,7 +34,6 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
   def isEmailUnused(email: String): Future[Boolean] = {
     databaseService.isEmailUnused(email)
   }
-
   def isUsernameUnused(username: String): Future[Boolean] = {
     databaseService.isUsernameUnused(username)
   }
@@ -42,6 +41,13 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
   def getUserByName(username: String): Future[Option[User]] = {
     databaseService.getUserByName(username)
   }
+  def getUserById(id: Int): Future[Option[User]] = {
+    databaseService.getUserById(id)
+  }
+  def getUserByEmail(email: String): Future[Option[User]] = {
+    databaseService.getUserByEmail(email)
+  }
+
 
   def registerUser(registration: Registration): Future[Option[User]] = {
     val result: Future[(Boolean, Boolean)] = for {
