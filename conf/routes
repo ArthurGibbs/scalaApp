@@ -242,7 +242,7 @@ GET     /api/users                      controllers.UserController.listUsers()
 #              schema:
 #                type: option[DisplayUser]
 ###
-GET     /api/users/name/:username    controllers.UserController.getUserByName(username: String)
+GET     /api/users/username/:username    controllers.UserController.getUserByName(username: String)
 
 
 ###

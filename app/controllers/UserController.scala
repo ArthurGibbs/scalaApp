@@ -57,8 +57,8 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
     }
   }
 
-
   def listUsers() = secureAction.async { implicit request: Request[AnyContent] =>
+      AuthService.verifyingUserWithRoles()(request.session)
 
       userService.listUsers().map(users =>
         Ok(users.map(_.user.public))
@@ -66,6 +66,8 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
   }
 
   def getUserByName(username: String) = Action.async { implicit request: Request[AnyContent] =>
+      AuthService.verifyingUserWithRoles()(request.session)
+
       userService.getUserByName(username).map( user =>
         user match {
           case Some(user) => Ok(user.user.public)
@@ -118,6 +120,5 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
       }
     )
   }
-
 
 }
