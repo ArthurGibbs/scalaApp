@@ -62,7 +62,8 @@ POST     /api/users                     controllers.RegistrationController.regis
 #              schema:
 #                type: boolean
 ###
-GET     /api/users/isUsernameUnused/{username}       controllers.RegistrationController.isUsernameUnused(username: String)
++nocsrf
+GET     /api/users/isUsernameUnused/:username       controllers.RegistrationController.isUsernameUnused(username: String)
 
 ###
 #   summary: finds if email is unused
@@ -74,7 +75,7 @@ GET     /api/users/isUsernameUnused/{username}       controllers.RegistrationCon
 #          schema:
 #            type: string
 #          required: true
-#          description: the email to lookup
+#          description: the email to lookup\
 #   responses:
 #       '200':
 #         description: OK
@@ -83,7 +84,8 @@ GET     /api/users/isUsernameUnused/{username}       controllers.RegistrationCon
 #              schema:
 #                type: boolean
 ###
-GET     /api/users/isEmailUnused/{email}         controllers.RegistrationController.isEmailUnused(email: String)
++nocsrf
+GET     /api/users/isEmailUnused/:email            controllers.RegistrationController.isEmailUnused(email: String)
 
 ###
 #   summary: gets a list of users

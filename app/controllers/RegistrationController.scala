@@ -26,8 +26,8 @@ class RegistrationController @Inject()(val controllerComponents: ControllerCompo
 
     def onSuccess(registration: Registration): Future[Result] = {
       log.debug(s"Received registration form for ${registration.username}, ${registration.email}")
-      userService.registerUser(registration).map(maybUser =>
-        maybUser match {
+      userService.registerUser(registration).map(maybeUser =>
+        maybeUser match {
           case Some(user) => Ok(user.toSelfDisplay())
           case _ => InternalServerError("Registration Failed")
         }
