@@ -14,7 +14,7 @@ class SecureAction @Inject()(parser: BodyParsers.Default)(implicit ec: Execution
   extends ActionBuilderImpl(parser) with Logging {
 
   override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
-    implicit def sessionData = AuthService.getAuthorizedUserData()(request.session)
+    implicit def sessionData = AuthService.verifyingUserWithRoles()(request.session)
     block(request)
   }
 }

@@ -13,7 +13,7 @@ import scala.concurrent.Future
 class SecureController @Inject()(val controllerComponents: ControllerComponents, userService: UserService) extends BaseController with I18nSupport with Logging {
 
   def test() = Action.async { implicit request: Request[AnyContent] =>
-        val sessionData = AuthService.getAuthorizedUserData()(request.session)
+        val sessionData = AuthService.verifyingUserWithRoles()(request.session)
 
         Future(Ok(sessionData.user.username))
   }

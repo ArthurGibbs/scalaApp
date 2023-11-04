@@ -3,7 +3,7 @@ package com.cask.services
 import com.cask.Jwt
 import com.cask.db.DatabaseService
 import com.cask.errors.RedirectingUnauthorizedException
-import com.cask.models.{SessionData, ServerUser}
+import com.cask.models.SessionData
 import com.google.common.hash.Hashing
 import com.google.inject.Inject
 import play.api.Configuration
@@ -58,24 +58,31 @@ class AuthService @Inject() (config: Configuration, databaseService: DatabaseSer
 object AuthService {
   val SESSIONDATAKEY = "userSession"
 
-  def getAuthorizedUserData()(session : Session) = {
-    val sessionData = session.get(AuthService.SESSIONDATAKEY) match {
-      case Some(serializedString) => {
-        val jsValue = Json.parse(serializedString)
+  def verifyingUserWithRoles(roles: Seq[String] = Seq())(session : Session) = {
+    val maybeSerializedSessionData = session.get(AuthService.SESSIONDATAKEY) match {
+      case Some(serializedSessionData) => {
+        val jsValue = Json.parse(serializedSessionData)
         val sessionData = Json.fromJson[SessionData](jsValue) match {
           case JsSuccess(value, path) => value
           case _ => {throw new IllegalStateException("parsing error")}
         }
+
+        roles.foreach(role => {
+          if(!sessionData.roles.map(_.roleName).contains(role)){
+            throw new RedirectingUnauthorizedException(s"Unauthorized Missing role $role","/login")
+          }
+        })
+
+
         //decode[SessionData](serializedString)
 
         sessionData
       }
       case _ => {
         throw new RedirectingUnauthorizedException("Unauthorized","/login")
-        //maybe redirecting error as this should only be non logged in users
       }
     }
-    sessionData
+    maybeSerializedSessionData
   }
 }
 

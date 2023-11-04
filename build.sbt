@@ -29,4 +29,3 @@ libraryDependencies += "org.scalaj" %% "scalaj-http" % "2.4.2"
 libraryDependencies += "com.github.jwt-scala" %% "jwt-play-json" % "9.4.4"
 
 libraryDependencies += "com.typesafe.play" %% "play-json-joda" % "2.10.2"
-

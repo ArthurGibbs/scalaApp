@@ -1,7 +1,8 @@
 package com.cask.services
 
 import com.cask.db.DatabaseService
-import com.cask.models.{DisplayUser, Registration, ServerUser, User}
+import com.cask.models.user.{PersonalUser, PublicUser, ServerUser}
+import com.cask.models.Registration
 import com.google.inject.Inject
 import org.joda.time.DateTime
 
@@ -76,7 +77,7 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
       val userSalt = Iterator.continually(Random.nextPrintableChar()).filter(_.isLetterOrDigit).take(64).mkString
       val emailValidationCode = Iterator.continually(Random.nextPrintableChar()).filter(_.isLetterOrDigit).take(8).mkString
       val hash = authService.getHashedPassword(registration.password, userSalt)
-      val du = DisplayUser(
+      val du = PublicUser(
         None,
         registration.username,
         None,
@@ -86,7 +87,7 @@ class UserService @Inject() (databaseService: DatabaseService, authService: Auth
         "",
         None)
 
-      val user = User(du, registration.email, emailVerified = false)
+      val user = PersonalUser(du, registration.email, emailVerified = false)
       val newUser = ServerUser(user,
         emailValidationCode,
         hash,

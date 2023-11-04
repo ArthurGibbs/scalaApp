@@ -185,8 +185,22 @@ GET     /api/users                      controllers.UserController.listUsers()
 #              schema:
 #                type: option[DisplayUser]
 ###
-GET     /api/users/byName/{username}    controllers.UserController.getUserByName(username: Option[String])
+GET     /api/users/name/{username}    controllers.UserController.getUserByName(username: String)
 
+
+###
+#   summary: gets a PersonalUser by id
+#   tags:
+#       - users
+#   responses:
+#       '200':
+#         description: OK
+#         content:
+#            application/json:
+#              schema:
+#                type: option[DisplayUser]
+###
+GET     /api/users/personal    controllers.UserController.getPersonalUserById()
 
 ###
 #   summary: test auth

@@ -1,6 +1,6 @@
 package com.cask.db
 
-import com.cask.models.{DisplayUser, ServerUser, User}
+import com.cask.models.user.{PersonalUser, PublicUser, ServerUser}
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Inject}
 import org.joda.time.DateTime
@@ -67,8 +67,8 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
         val rs = stm.executeQuery
 
         if (rs.next) {
-          val du = DisplayUser.fromResultSet(rs)
-          val user = User.fromResultSet(rs,du)
+          val du = PublicUser.fromResultSet(rs)
+          val user = PersonalUser.fromResultSet(rs,du)
           val su = ServerUser.fromResultSet(rs,user)
           Some(su)
         } else {
@@ -88,8 +88,8 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
 
         val list: ListBuffer[ServerUser] = ListBuffer()
         while (rs.next) {
-          val du = DisplayUser.fromResultSet(rs)
-          val user = User.fromResultSet(rs,du)
+          val du = PublicUser.fromResultSet(rs)
+          val user = PersonalUser.fromResultSet(rs,du)
           val su = ServerUser.fromResultSet(rs,user)
           list += su
         }
@@ -107,8 +107,8 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
         val rs = stm.executeQuery
 
         if (rs.next) {
-          val du = DisplayUser.fromResultSet(rs)
-          val user = User.fromResultSet(rs,du)
+          val du = PublicUser.fromResultSet(rs)
+          val user = PersonalUser.fromResultSet(rs,du)
           val su = ServerUser.fromResultSet(rs,user)
           Some(su)
         } else {
@@ -159,8 +159,8 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
         val rs = stm.executeQuery
 
         if (rs.next) {
-          val du = DisplayUser.fromResultSet(rs)
-          val user = User.fromResultSet(rs,du)
+          val du = PublicUser.fromResultSet(rs)
+          val user = PersonalUser.fromResultSet(rs,du)
           val su = ServerUser.fromResultSet(rs,user)
           Some(su)
         } else {
@@ -176,7 +176,7 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
         //val stm = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
         val stm = conn.prepareStatement("UPDATE Users.Users SET " +
           "username = ?, email= ?,  email_verified= ?,  email_verification_code = ?, " +
-          "hash = ?,  salt = ?, profile_image_id = ?, created_on = ?, last_seen = ?, gender = ?, bio = ?, bio_updated = ? " +
+          "hash = ?,  salt = ?, profile_image_id = ?, created_on = ?, last_seen = ?, gender = ?, bio = ?, bio_updated = ?, password_reset_code = ? " +
           "WHERE Users.id = ? RETURNING *;",
           ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
         stm.setString(1, serverUser.user.displayUser.username)
@@ -191,14 +191,17 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
         setOptionalString(stm,10,serverUser.user.displayUser.gender)
         stm.setString(11, serverUser.user.displayUser.bio)
         setOptionalDateTime(stm,12,serverUser.user.displayUser.bioUpdated)
-        stm.setInt(13, serverUser.user.displayUser.id.getOrElse(0))//todo prevent user id 0
+        setOptionalString(stm,13,serverUser.passwordResetCode)
+
+
+        stm.setInt(14, serverUser.user.displayUser.id.getOrElse(0))//todo prevent user id 0
 
 
         val rs = stm.executeQuery
 
         if (rs.next) {
-          val du = DisplayUser.fromResultSet(rs)
-          val user = User.fromResultSet(rs,du)
+          val du = PublicUser.fromResultSet(rs)
+          val user = PersonalUser.fromResultSet(rs,du)
           val su = ServerUser.fromResultSet(rs,user)
           Some(su)
         } else {
@@ -217,8 +220,8 @@ final class PostgresqlDatabaseClient @Inject()(db: Database, databaseExecutionCo
         val rs = stm.executeQuery
 
         if (rs.next) {
-          val du = DisplayUser.fromResultSet(rs)
-          val user = User.fromResultSet(rs,du)
+          val du = PublicUser.fromResultSet(rs)
+          val user = PersonalUser.fromResultSet(rs,du)
           val su = ServerUser.fromResultSet(rs,user)
           Some(su)
         } else {

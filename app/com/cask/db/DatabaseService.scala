@@ -1,6 +1,6 @@
 package com.cask.db
 
-import com.cask.models.ServerUser
+import com.cask.models.user.ServerUser
 import com.google.inject.Inject
 
 import scala.concurrent.Future
