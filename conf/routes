@@ -217,5 +217,6 @@ GET     /api/users/personal    controllers.UserController.getPersonalUserById()
 #              schema:
 #                type: string
 ###
-GET     /api/test    controllers.SecureController.test()
+
+POST    /api/images  controllers.ImageController.upload()
 
