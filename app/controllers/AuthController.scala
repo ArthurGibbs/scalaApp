@@ -8,6 +8,7 @@ import play.api.mvc._
 import com.cask.WritableImplicits._
 import com.cask.errors.RedirectingUnauthorizedException
 import com.cask.models.SessionData
+import com.cask.models.user.PersonalUser
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -29,8 +30,8 @@ class AuthController @Inject()(val controllerComponents: ControllerComponents, u
         (maybeUsernameOrEmail, maybePassword) match {
           case (Some(usernameOrEmail),  Some(password)) => {
             authService.login(usernameOrEmail, password).map(mt => mt match {
-              case Some(sessionData) => {
-                Ok(sessionData)
+              case Some((personalUser: PersonalUser, sessionData: SessionData)) => {
+                Ok(personalUser)
                   .withSession(request.session + (AuthService.SESSIONDATAKEY -> Json.stringify(Json.toJson(sessionData))))
               }
               case _ => {throw new RedirectingUnauthorizedException("Invalid username/email and or password","")}

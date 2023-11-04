@@ -79,7 +79,7 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
   def getSelf() = Action.async { implicit request: Request[AnyContent] =>
     val sessionData = AuthService.verifyingUserWithRoles()(request.session)
 
-    userService.getUserById(sessionData.user.id.get).map(maybeServerUser =>
+    userService.getUserById(sessionData.id).map(maybeServerUser =>
       maybeServerUser match {
         case Some(serverUser) => Ok(serverUser.user)
         case _ => NotFound("")
@@ -89,7 +89,6 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
 
   def setSelf() = Action.async { implicit request: Request[AnyContent] =>
     val sessionData = AuthService.verifyingUserWithRoles()(request.session)
-
     request.body.asJson match {
       case Some(json) => {
 
@@ -99,7 +98,7 @@ class UserController @Inject()(val controllerComponents: ControllerComponents, u
           case _ => {throw new IllegalStateException("unknown error")}
         }
 
-        if (personalUser.public.id != sessionData.user.id){
+        if (personalUser.public.id.get != sessionData.id){
           throw new IllegalArgumentException("no!!")
         }
 

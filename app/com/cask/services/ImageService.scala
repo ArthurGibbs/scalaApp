@@ -37,7 +37,7 @@ class  ImageService @Inject()(config: Configuration, databaseService: DatabaseSe
     file.setReadable(true)
     file.setWritable(true)
     file.setExecutable(true)
-    val image: Image = Image(0, sessionData.user.id.get, s"$fileName.$extension", "", true, false, DateTime.now() )
+    val image: Image = Image(0, sessionData.id, s"$fileName.$extension", "", true, false, DateTime.now() )
     databaseService.saveImage(image)
   }
 

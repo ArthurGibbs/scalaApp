@@ -3,7 +3,7 @@ package com.cask.services
 import com.cask.db.DatabaseService
 import com.cask.errors.RedirectingUnauthorizedException
 import com.cask.models.SessionData
-import com.cask.models.user.ServerUser
+import com.cask.models.user.{PersonalUser, ServerUser}
 import com.google.common.hash.Hashing
 import com.google.inject.Inject
 import play.api.Configuration
@@ -13,12 +13,11 @@ import play.api.mvc.{AnyContent, Request, Session}
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.nio.charset.StandardCharsets
 import scala.concurrent.Future
-import scala.util.Random
 
 class AuthService @Inject() (config: Configuration, databaseService: DatabaseService) {
   lazy val serverSalt: String = config.get[String]( "app.salt")
 
-  def login(usernameOrEmail: String, password: String): Future[Option[SessionData]] = {
+  def login(usernameOrEmail: String, password: String): Future[Option[(PersonalUser, SessionData)]] = {
     val tuple = for {
       maybeNameUser <- databaseService.getUserByName(usernameOrEmail)
       maybeEmailUser <- databaseService.getUserByEmail(usernameOrEmail)
@@ -37,7 +36,7 @@ class AuthService @Inject() (config: Configuration, databaseService: DatabaseSer
             //todo get roles
             val roles = Seq()
 
-            Some((SessionData(claimedUser.user.public, roles)))
+            Some((claimedUser.user, SessionData(claimedUser.user.public.id.get, roles)))
           } else {
             None
           }
@@ -66,7 +65,7 @@ object AuthService {
         }
 
         roles.foreach(role => {
-          if(!sessionData.roles.map(_.roleName).contains(role)){
+          if(!sessionData.roles.contains(role)){
             throw new RedirectingUnauthorizedException(s"Unauthorized Missing role $role","/login")
           }
         })
