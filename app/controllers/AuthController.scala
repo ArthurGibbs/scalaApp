@@ -45,11 +45,6 @@ class AuthController @Inject()(val controllerComponents: ControllerComponents, u
     }
   }
 
-  def session(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    val session: SessionData = AuthService.verifyingUserWithRoles()(request.session)
-    Ok(session)
-  }
-
   def logout() = Action { implicit request: Request[AnyContent] =>
     Ok(JsObject(
       Seq(

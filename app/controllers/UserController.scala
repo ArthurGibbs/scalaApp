@@ -11,7 +11,6 @@ import com.cask.services.{AuthService, UserService}
 import play.api.libs.json.{JsError, JsString, JsSuccess, Json}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 @Singleton
 class UserController @Inject()(val controllerComponents: ControllerComponents, userService: UserService, secureAction: SecureAction, authService: AuthService) extends BaseController with I18nSupport with Logging  {

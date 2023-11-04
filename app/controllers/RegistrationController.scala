@@ -5,38 +5,34 @@ import com.cask.models.Registration
 import com.cask.services.{AuthService, UserService}
 import com.cask.{I18nSupport, Logging}
 import com.google.inject.{Inject, Singleton}
-import play.api.data.{Form, FormError}
-import play.api.libs.json.{JsBoolean, JsObject, JsString, JsValue, Json}
+import play.api.libs.json._
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 @Singleton
 class RegistrationController @Inject()(val controllerComponents: ControllerComponents, userService: UserService, authService: AuthService) extends BaseController with I18nSupport with Logging {
 
-  def registerUser = Action.async { implicit request: Request[AnyContent] =>
-    def onError(formWithErrors: Form[Registration]): Future[Result] = {
-      val allErrors: Seq[FormError] = formWithErrors.globalErrors ++ formWithErrors.errors
-      val errors = allErrors.map(err => err.format + " [" + err.key + "]").distinct.map(x => {
-        log.warn("Registration form validation failed: " + x)
-        x
-      })
-      Future(BadRequest(errors))
-    }
-
-    def onSuccess(registration: Registration): Future[Result] = {
-      log.debug(s"Received registration form for ${registration.username}, ${registration.email}")
-      userService.registerUser(registration).map(maybeUser =>
-        maybeUser match {
-          case Some(serverUser) => Ok(serverUser.user.public)
-          case _ => InternalServerError("Registration Failed")
+  def registerUser: Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
+    request.body.asJson match {
+      case Some(json) => {
+        val registration = Json.fromJson[Registration](json) match {
+          case JsSuccess(value, _) => value
+          case JsError(errors) => throw new IllegalStateException("parsing error" + errors.toString())
+          case _ => {
+            throw new IllegalStateException("Unknown parsing error")
+          }
         }
-      )
+        log.debug(s"Received registration form for ${registration.username}, ${registration.email}")
+        userService.registerUser(registration).map(maybeUser =>
+          maybeUser match {
+            case Some(serverUser) => Ok(serverUser.user.public)
+            case _ => InternalServerError("Registration Failed")
+          }
+        )
+      }
+      case _ => throw new IllegalStateException("Missing Body")
     }
-
-    val userRegistrationResult = Registration.form.bindFromRequest()
-    userRegistrationResult.fold(onError, onSuccess)
   }
 
   def isUsernameUnused(username: String) = Action.async { implicit request: Request[AnyContent] =>
