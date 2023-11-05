@@ -7,7 +7,7 @@ import java.sql.Timestamp
 import scala.util.Random
 
 class SlickDBClient @Inject()() extends UsersTable {
-  val db = Database.forConfig("app")
+  val db = Database.forConfig("slick.dbs.app")
 
   def testAdd(): Unit ={
     val foo = UserTableRow(None,randomString,randomString,true,"2342","234234","234234",None,Some(12),new Timestamp(DateTime.now().getMillis()),new Timestamp(DateTime.now().getMillis()),None,"",None)

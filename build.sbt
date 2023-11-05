@@ -25,7 +25,7 @@ libraryDependencies += "com.github.tminglei" %% "slick-pg" % "0.21.1"
 libraryDependencies += "com.github.tminglei" %% "slick-pg_circe-json" % "0.21.1"
 
 libraryDependencies += "com.typesafe.play" %% "play-slick" % "5.1.0"
-libraryDependencies += "com.typesafe.play" %% "play-slick-evolutions" % "5.1.0" % Test
+libraryDependencies += "com.typesafe.play" %% "play-slick-evolutions" % "5.1.0"
 
 
 libraryDependencies += "joda-time" % "joda-time" % "2.12.5"
